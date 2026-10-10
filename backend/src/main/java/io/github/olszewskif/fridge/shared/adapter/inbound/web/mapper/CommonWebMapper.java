@@ -1,6 +1,9 @@
 package io.github.olszewskif.fridge.shared.adapter.inbound.web.mapper;
 
 import io.github.olszewskif.fridge.shared.domain.PageQuery;
+import io.github.olszewskif.fridge.shared.domain.PageResult;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
@@ -17,5 +20,9 @@ public final class CommonWebMapper {
                 ))
                 .toList();
         return new PageQuery(pageable.getPageNumber(), pageable.getPageSize(), sort);
+    }
+
+    public <T> Page<T> toPage(PageResult<T> result, Pageable pageable) {
+        return new PageImpl<>(result.data(), pageable, result.totalElements());
     }
 }

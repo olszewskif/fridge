@@ -1,0 +1,15 @@
+package io.github.olszewskif.fridge.inventory.adapter.inbound.web.dto;
+
+import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+public record AddFridgeItemRequest(
+        @NotNull UUID productId,
+        @NotNull @Valid AmountDto amount,
+        @Nullable LocalDate expiryDate
+) {
+}
