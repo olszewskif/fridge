@@ -6,6 +6,7 @@ import io.github.olszewskif.fridge.catalog.application.dto.UpdateCategoryCommand
 import io.github.olszewskif.fridge.catalog.application.mapper.CategoryAppMapper;
 import io.github.olszewskif.fridge.catalog.application.usecase.CategoryUseCase;
 import io.github.olszewskif.fridge.catalog.domain.Category;
+import io.github.olszewskif.fridge.catalog.domain.CategoryFilterQuery;
 import io.github.olszewskif.fridge.catalog.domain.CategoryId;
 import io.github.olszewskif.fridge.catalog.domain.exception.CategoryNotFoundException;
 import io.github.olszewskif.fridge.catalog.domain.port.CategoryRepository;
@@ -33,8 +34,9 @@ public class CategoryService implements CategoryUseCase {
 
     @Transactional(readOnly = true)
     @Override
-    public PageResult<CategoryResult> getCategories(PageQuery pageQuery) {
-        return repository.findAll(pageQuery).map(mapper::toResult);
+    public PageResult<CategoryResult> getCategories(CategoryFilterQuery filters,
+                                                    PageQuery pageQuery) {
+        return repository.findAll(filters, pageQuery).map(mapper::toResult);
     }
 
     @Override

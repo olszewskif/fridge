@@ -1,11 +1,13 @@
 package io.github.olszewskif.fridge.catalog.adapter.inbound.web.mapper;
 
+import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.CategoryFilterRequest;
 import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.CategoryResponse;
 import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.CreateCategoryRequest;
 import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.UpdateCategoryRequest;
 import io.github.olszewskif.fridge.catalog.application.dto.CategoryResult;
 import io.github.olszewskif.fridge.catalog.application.dto.CreateCategoryCommand;
 import io.github.olszewskif.fridge.catalog.application.dto.UpdateCategoryCommand;
+import io.github.olszewskif.fridge.catalog.domain.CategoryFilterQuery;
 import io.github.olszewskif.fridge.catalog.domain.CategoryId;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +35,14 @@ public final class CategoryWebMapper {
         return new UpdateCategoryCommand(
                 request.name(),
                 toCategoryId(request.parentId())
+        );
+    }
+
+    public CategoryFilterQuery toFilterQuery(CategoryFilterRequest request) {
+        return new CategoryFilterQuery(
+                request.search(),
+                request.parentId() == null ? null : CategoryId.of(request.parentId()),
+                request.isRoot()
         );
     }
 

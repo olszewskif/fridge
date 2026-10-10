@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
 @Repository
-public interface FridgeJpaRepository extends JpaRepository<FridgeJpaEntity, UUID> {
+public interface FridgeJpaRepository extends JpaRepository<FridgeJpaEntity, UUID>, JpaSpecificationExecutor<FridgeJpaEntity> {
 }

@@ -8,3 +8,15 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+
+logging:
+  level:
+    io.github.olszewskif.fridge: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
+
+app:
+  external:
+    open-food-facts:
+      url: https://world.openfoodfacts.net/api/v3.6

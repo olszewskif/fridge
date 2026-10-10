@@ -1,6 +1,7 @@
 package io.github.olszewskif.fridge.catalog.adapter.inbound.web.mapper;
 
 import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.CreateProductRequest;
+import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.ProductFilterRequest;
 import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.ProductResponse;
 import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.UpdateProductRequest;
 import io.github.olszewskif.fridge.catalog.application.dto.CreateProductCommand;
@@ -8,6 +9,7 @@ import io.github.olszewskif.fridge.catalog.application.dto.ProductResult;
 import io.github.olszewskif.fridge.catalog.application.dto.UpdateProductCommand;
 import io.github.olszewskif.fridge.catalog.domain.Barcode;
 import io.github.olszewskif.fridge.catalog.domain.CategoryId;
+import io.github.olszewskif.fridge.catalog.domain.ProductFilterQuery;
 import io.github.olszewskif.fridge.catalog.domain.ProductId;
 import org.springframework.stereotype.Component;
 
@@ -48,6 +50,11 @@ public final class ProductWebMapper {
                 toBarcode(request.barcode()),
                 request.imageUrl()
         );
+    }
+
+    public ProductFilterQuery toFilterQuery(ProductFilterRequest request) {
+        return new ProductFilterQuery(request.search(),
+                mapToCategoryId(request.categoryIds()));
     }
 
     private static Barcode toBarcode(String value) {

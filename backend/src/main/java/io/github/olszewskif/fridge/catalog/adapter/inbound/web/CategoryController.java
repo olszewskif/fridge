@@ -1,12 +1,15 @@
 package io.github.olszewskif.fridge.catalog.adapter.inbound.web;
 
+import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.CategoryFilterRequest;
 import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.CategoryResponse;
 import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.CreateCategoryRequest;
 import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.UpdateCategoryRequest;
 import io.github.olszewskif.fridge.catalog.adapter.inbound.web.mapper.CategoryWebMapper;
 import io.github.olszewskif.fridge.catalog.application.usecase.CategoryUseCase;
+import io.github.olszewskif.fridge.catalog.domain.CategoryFilterQuery;
 import io.github.olszewskif.fridge.catalog.domain.CategoryId;
 import io.github.olszewskif.fridge.shared.adapter.inbound.web.mapper.CommonWebMapper;
+import io.github.olszewskif.fridge.shared.domain.PageQuery;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -40,8 +43,13 @@ public class CategoryController {
     }
 
     @GetMapping
-    public Page<CategoryResponse> getCategories(Pageable pageable) {
-        var result = useCase.getCategories(commonWebMapper.toPageQuery(pageable)).map(mapper::toResponse);
+    public Page<CategoryResponse> getCategories(
+            CategoryFilterRequest request,
+            Pageable pageable
+    ) {
+        PageQuery pageQuery = commonWebMapper.toPageQuery(pageable);
+        CategoryFilterQuery filterQuery = mapper.toFilterQuery(request);
+        var result = useCase.getCategories(filterQuery, pageQuery).map(mapper::toResponse);
         return new PageImpl<>(result.data(), pageable, result.totalElements());
     }
 

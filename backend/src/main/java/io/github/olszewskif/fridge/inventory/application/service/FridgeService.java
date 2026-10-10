@@ -6,6 +6,7 @@ import io.github.olszewskif.fridge.inventory.application.dto.UpdateFridgeCommand
 import io.github.olszewskif.fridge.inventory.application.mapper.FridgeAppMapper;
 import io.github.olszewskif.fridge.inventory.application.usecase.FridgeUseCase;
 import io.github.olszewskif.fridge.inventory.domain.Fridge;
+import io.github.olszewskif.fridge.inventory.domain.FridgeFilterQuery;
 import io.github.olszewskif.fridge.inventory.domain.FridgeId;
 import io.github.olszewskif.fridge.inventory.domain.UserId;
 import io.github.olszewskif.fridge.inventory.domain.exception.FridgeNotFoundException;
@@ -36,8 +37,9 @@ public class FridgeService implements FridgeUseCase {
 
     @Transactional(readOnly = true)
     @Override
-    public PageResult<FridgeResult> getFridges(PageQuery pageQuery) {
-        return repository.findAll(pageQuery).map(mapper::toResult);
+    public PageResult<FridgeResult> getFridges(FridgeFilterQuery filters,
+                                               PageQuery pageQuery) {
+        return repository.findAll(filters, pageQuery).map(mapper::toResult);
     }
 
     @Override

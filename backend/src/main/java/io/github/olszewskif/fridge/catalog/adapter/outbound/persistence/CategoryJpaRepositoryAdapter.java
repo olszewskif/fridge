@@ -1,7 +1,9 @@
 package io.github.olszewskif.fridge.catalog.adapter.outbound.persistence;
 
 import io.github.olszewskif.fridge.catalog.adapter.outbound.persistence.mapper.CategoryJpaMapper;
+import io.github.olszewskif.fridge.catalog.adapter.outbound.persistence.specification.CategorySpecifications;
 import io.github.olszewskif.fridge.catalog.domain.Category;
+import io.github.olszewskif.fridge.catalog.domain.CategoryFilterQuery;
 import io.github.olszewskif.fridge.catalog.domain.CategoryId;
 import io.github.olszewskif.fridge.catalog.domain.port.CategoryRepository;
 import io.github.olszewskif.fridge.shared.adapter.outbound.persistence.mapper.CommonJpaMapper;
@@ -11,6 +13,7 @@ import io.github.olszewskif.fridge.shared.domain.PageResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -26,6 +29,7 @@ public class CategoryJpaRepositoryAdapter implements CategoryRepository {
     private final CategoryJpaRepository jpaRepository;
     private final CategoryJpaMapper mapper;
     private final CommonJpaMapper commonJpaMapper;
+    private final CategorySpecifications specifications;
 
     @Override
     public Optional<Category> findById(CategoryId id) {
@@ -38,9 +42,10 @@ public class CategoryJpaRepositoryAdapter implements CategoryRepository {
     }
 
     @Override
-    public PageResult<Category> findAll(PageQuery pageQuery) {
+    public PageResult<Category> findAll(CategoryFilterQuery filters, PageQuery pageQuery) {
         Pageable pageable = commonJpaMapper.toPageable(pageQuery);
-        Page<CategoryJpaEntity> page = jpaRepository.findAll(pageable);
+        Specification<CategoryJpaEntity> spec = specifications.build(filters);
+        Page<CategoryJpaEntity> page = jpaRepository.findAll(spec, pageable);
         return commonJpaMapper.toPageResult(page)
                 .map(mapper::toDomainEntity);
     }
@@ -67,6 +72,12 @@ public class CategoryJpaRepositoryAdapter implements CategoryRepository {
     @Override
     public void delete(CategoryId id) {
         jpaRepository.deleteById(id.getValue());
+    }
+
+    @Override
+    public Set<Category> findAllByNames(Set<String> names) {
+        return jpaRepository.findByNameInIgnoreCase(names).stream()
+                .map(mapper::toDomainEntity).collect(Collectors.toSet());
     }
 
 }

@@ -37,8 +37,12 @@ public class FridgeController {
     }
 
     @GetMapping
-    public Page<FridgeResponse> getFridges(Pageable pageable) {
-        var result = useCase.getFridges(commonWebMapper.toPageQuery(pageable)).map(fridgeMapper::toResponse);
+    public Page<FridgeResponse> getFridges(
+            FridgeFilterRequest request,
+            Pageable pageable
+    ) {
+        var filter = fridgeMapper.toFilterQuery(request);
+        var result = useCase.getFridges(filter, commonWebMapper.toPageQuery(pageable)).map(fridgeMapper::toResponse);
         return commonWebMapper.toPage(result, pageable);
     }
 

@@ -1,15 +1,16 @@
 package io.github.olszewskif.fridge.catalog.adapter.inbound.web;
 
-import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.CreateProductRequest;
-import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.ProductResponse;
-import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.UpdateProductRequest;
+import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.*;
 import io.github.olszewskif.fridge.catalog.adapter.inbound.web.mapper.ProductWebMapper;
 import io.github.olszewskif.fridge.catalog.application.dto.AddCategoryCommand;
 import io.github.olszewskif.fridge.catalog.application.dto.RemoveCategoryCommand;
 import io.github.olszewskif.fridge.catalog.application.usecase.ProductUseCase;
+import io.github.olszewskif.fridge.catalog.domain.Barcode;
 import io.github.olszewskif.fridge.catalog.domain.CategoryId;
+import io.github.olszewskif.fridge.catalog.domain.ProductFilterQuery;
 import io.github.olszewskif.fridge.catalog.domain.ProductId;
 import io.github.olszewskif.fridge.shared.adapter.inbound.web.mapper.CommonWebMapper;
+import io.github.olszewskif.fridge.shared.domain.PageQuery;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,8 +36,13 @@ public class ProductController {
     }
 
     @GetMapping
-    public Page<ProductResponse> getProducts(Pageable pageable) {
-        var result = useCase.getProducts(commonWebMapper.toPageQuery(pageable)).map(mapper::toResponse);
+    public Page<ProductResponse> getProducts(
+            ProductFilterRequest request,
+            Pageable pageable
+    ) {
+        PageQuery pageQuery = commonWebMapper.toPageQuery(pageable);
+        var filters = mapper.toFilterQuery(request);
+        var result = useCase.getProducts(filters, pageQuery).map(mapper::toResponse);
         return new PageImpl<>(result.data(), pageable, result.totalElements());
     }
 
@@ -76,6 +82,11 @@ public class ProductController {
     ) {
         var command = new RemoveCategoryCommand(ProductId.of(id), CategoryId.of(categoryId));
         return mapper.toResponse(useCase.removeCategory(command));
+    }
+
+    @PostMapping("/scan/{barcode}")
+    public ProductResponse scanProduct(@PathVariable String barcode) {
+        return mapper.toResponse(useCase.getProductByBarcode(new Barcode(barcode)));
     }
 
 }

@@ -2,24 +2,23 @@ package io.github.olszewskif.fridge.catalog.application.service;
 
 import io.github.olszewskif.fridge.catalog.application.dto.*;
 import io.github.olszewskif.fridge.catalog.application.mapper.ProductAppMapper;
+import io.github.olszewskif.fridge.catalog.application.port.OpenFoodFactsApi;
 import io.github.olszewskif.fridge.catalog.application.usecase.ProductUseCase;
-import io.github.olszewskif.fridge.catalog.domain.Category;
-import io.github.olszewskif.fridge.catalog.domain.CategoryId;
-import io.github.olszewskif.fridge.catalog.domain.Product;
-import io.github.olszewskif.fridge.catalog.domain.ProductId;
+import io.github.olszewskif.fridge.catalog.domain.*;
 import io.github.olszewskif.fridge.catalog.domain.exception.CategoryNotFoundException;
 import io.github.olszewskif.fridge.catalog.domain.exception.ProductNotFoundException;
 import io.github.olszewskif.fridge.catalog.domain.port.CategoryRepository;
 import io.github.olszewskif.fridge.catalog.domain.port.ProductRepository;
 import io.github.olszewskif.fridge.shared.domain.Entity;
-import io.github.olszewskif.fridge.shared.domain.PageResult;
 import io.github.olszewskif.fridge.shared.domain.PageQuery;
+import io.github.olszewskif.fridge.shared.domain.PageResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,6 +30,7 @@ public class ProductService implements ProductUseCase {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductAppMapper mapper;
+    private final OpenFoodFactsApi openFoodFactsApi;
 
     @Transactional(readOnly = true)
     @Override
@@ -42,8 +42,9 @@ public class ProductService implements ProductUseCase {
 
     @Transactional(readOnly = true)
     @Override
-    public PageResult<ProductResult> getProducts(PageQuery pageQuery) {
-        PageResult<Product> page = productRepository.findAll(pageQuery);
+    public PageResult<ProductResult> getProducts(ProductFilterQuery filters,
+                                                 PageQuery pageQuery) {
+        PageResult<Product> page = productRepository.findAll(filters, pageQuery);
 
         // Aggregate and query all categories at once
         Set<CategoryId> categoryIds = page.data().stream()
@@ -67,7 +68,7 @@ public class ProductService implements ProductUseCase {
                 command.imageUrl(),
                 command.categoryIds()
         );
-        Set<Category> categories = resolveCategories(product.getCategories());
+        Set<Category> categories = resolveCategoryIds(product.getCategories());
         return mapper.toResult(productRepository.save(product), categories);
     }
 
@@ -114,18 +115,49 @@ public class ProductService implements ProductUseCase {
         return toResult(productRepository.save(product));
     }
 
+    @Override
+    public ProductResult getProductByBarcode(Barcode barcode) {
+        Optional<Product> product = productRepository.findByBarcode(barcode);
+
+        if (product.isPresent()) {
+            return toResult(product.get());
+        }
+
+        ExternalProduct externalProduct = openFoodFactsApi.findByBarcode(barcode)
+                .orElseThrow(() -> new ProductNotFoundException(barcode));
+
+        Set<String> categoryNames = externalProduct.categories();
+        Set<Category> categories = resolveCategoryNames(categoryNames);
+
+        Product newProduct = Product.create(
+                externalProduct.name(),
+                externalProduct.brand(),
+                barcode,
+                externalProduct.imageUrl(),
+                categories.stream().map(Entity::getId).collect(Collectors.toSet())
+        );
+        productRepository.save(newProduct);
+        return mapper.toResult(newProduct, categories);
+    }
+
     private ProductResult toResult(Product product) {
         return mapper.toResult(product, categoryRepository.findAllById(product.getCategories()));
     }
 
-    private Set<Category> resolveCategories(Set<CategoryId> ids) {
+    private Set<Category> resolveCategoryIds(Set<CategoryId> ids) {
         Set<Category> categories = categoryRepository.findAllById(ids);
-        Set<CategoryId> found = categories.stream().map(Entity::getId).collect(Collectors.toSet());
+        Set<CategoryId> found = categories.stream()
+                .map(Entity::getId)
+                .collect(Collectors.toSet());
         for (CategoryId id : ids) {
             if (!found.contains(id)) {
                 throw new CategoryNotFoundException(id);
             }
         }
         return categories;
+    }
+
+    private Set<Category> resolveCategoryNames(Set<String> names) {
+        return categoryRepository.findAllByNames(names);
     }
 }

@@ -2,6 +2,7 @@ package io.github.olszewskif.fridge.inventory.adapter.outbound.persistence;
 
 import io.github.olszewskif.fridge.inventory.adapter.outbound.persistence.mapper.FridgeJpaMapper;
 import io.github.olszewskif.fridge.inventory.domain.Fridge;
+import io.github.olszewskif.fridge.inventory.domain.FridgeFilterQuery;
 import io.github.olszewskif.fridge.inventory.domain.FridgeId;
 import io.github.olszewskif.fridge.inventory.domain.port.FridgeRepository;
 import io.github.olszewskif.fridge.shared.adapter.outbound.persistence.mapper.CommonJpaMapper;
@@ -10,6 +11,7 @@ import io.github.olszewskif.fridge.shared.domain.PageResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -22,6 +24,8 @@ public class FridgeJpaRepositoryAdapter implements FridgeRepository {
     private final FridgeJpaMapper mapper;
     private final CommonJpaMapper commonJpaMapper;
 
+    private final io.github.olszewskif.fridge.inventory.adapter.outbound.persistence.specification.FridgeSpecifications specifications;
+
     @Override
     public Optional<Fridge> findById(FridgeId id) {
         return jpaRepository.findById(id.getValue()).map(mapper::toDomainEntity);
@@ -33,9 +37,10 @@ public class FridgeJpaRepositoryAdapter implements FridgeRepository {
     }
 
     @Override
-    public PageResult<Fridge> findAll(PageQuery pageQuery) {
+    public PageResult<Fridge> findAll(FridgeFilterQuery filters, PageQuery pageQuery) {
         Pageable pageable = commonJpaMapper.toPageable(pageQuery);
-        Page<FridgeJpaEntity> page = jpaRepository.findAll(pageable);
+        Specification<FridgeJpaEntity> spec = specifications.build(filters);
+        Page<FridgeJpaEntity> page = jpaRepository.findAll(spec, pageable);
         return commonJpaMapper.toPageResult(page)
                 .map(mapper::toDomainEntity);
     }
