@@ -6,7 +6,7 @@ import jakarta.annotation.Nullable;
 public record UpdateFridgeItemCommand(
         FridgeId fridgeId,
         FridgeItemId itemId,
-        @Nullable Amount amount,
+        Quantity quantity,
         @Nullable ExpiryDate expiryDate
 ) {
 }

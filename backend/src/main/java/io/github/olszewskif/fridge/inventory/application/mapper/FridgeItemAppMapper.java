@@ -15,7 +15,7 @@ public final class FridgeItemAppMapper {
                 fridgeItem.getProductId(),
                 fridgeItem.getAddedBy(),
                 fridgeItem.getAddedAt(),
-                fridgeItem.getAmount(),
+                fridgeItem.getQuantity(),
                 fridgeItem.getExpiryDate()
         );
     }

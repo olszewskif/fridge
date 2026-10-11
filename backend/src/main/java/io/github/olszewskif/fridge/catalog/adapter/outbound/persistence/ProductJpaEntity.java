@@ -27,6 +27,10 @@ public class ProductJpaEntity extends JpaEntity {
     @Column(nullable = false, unique = true)
     private String barcode;
 
+    private Double amount;
+
+    private String unit;
+
     private String imageUrl;
 
     @ElementCollection

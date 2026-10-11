@@ -28,9 +28,7 @@ public final class FridgeJpaMapper {
     public void updateJpaEntity(Fridge fridge, FridgeJpaEntity entity) {
         entity.setName(fridge.getName());
         entity.setCreatedBy(fridge.getCreatedBy().getValue());
-        if (fridge.getCreatedAt() != null) {
-            entity.setCreatedAt(fridge.getCreatedAt());
-        }
+        entity.setCreatedAt(fridge.getCreatedAt());
 
         List<FridgeItem> fridgeItems = fridge.getItems();
 

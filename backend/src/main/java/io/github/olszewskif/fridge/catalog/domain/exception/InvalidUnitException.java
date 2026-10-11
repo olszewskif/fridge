@@ -1,4 +1,4 @@
-package io.github.olszewskif.fridge.inventory.domain.exception;
+package io.github.olszewskif.fridge.catalog.domain.exception;
 
 import io.github.olszewskif.fridge.shared.domain.DomainException;
 

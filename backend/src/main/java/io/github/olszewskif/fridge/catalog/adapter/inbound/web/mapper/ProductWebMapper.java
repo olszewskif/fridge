@@ -1,16 +1,10 @@
 package io.github.olszewskif.fridge.catalog.adapter.inbound.web.mapper;
 
-import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.CreateProductRequest;
-import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.ProductFilterRequest;
-import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.ProductResponse;
-import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.UpdateProductRequest;
+import io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto.*;
 import io.github.olszewskif.fridge.catalog.application.dto.CreateProductCommand;
 import io.github.olszewskif.fridge.catalog.application.dto.ProductResult;
 import io.github.olszewskif.fridge.catalog.application.dto.UpdateProductCommand;
-import io.github.olszewskif.fridge.catalog.domain.Barcode;
-import io.github.olszewskif.fridge.catalog.domain.CategoryId;
-import io.github.olszewskif.fridge.catalog.domain.ProductFilterQuery;
-import io.github.olszewskif.fridge.catalog.domain.ProductId;
+import io.github.olszewskif.fridge.catalog.domain.*;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -27,6 +21,7 @@ public final class ProductWebMapper {
                 result.name(),
                 result.brand(),
                 result.barcode().value(),
+                toNetQuantityDto(result.netQuantity()),
                 result.imageUrl(),
                 mapToUUID(result.categories())
         );
@@ -37,6 +32,7 @@ public final class ProductWebMapper {
                 request.name(),
                 request.brand(),
                 toBarcode(request.barcode()),
+                toNetQuantity(request.netQuantity()),
                 request.imageUrl(),
                 mapToCategoryId(request.categoryIds())
         );
@@ -48,6 +44,7 @@ public final class ProductWebMapper {
                 request.name(),
                 request.brand(),
                 toBarcode(request.barcode()),
+                toNetQuantity(request.netQuantity()),
                 request.imageUrl()
         );
     }
@@ -57,11 +54,22 @@ public final class ProductWebMapper {
                 mapToCategoryId(request.categoryIds()));
     }
 
+    private static NetQuantity toNetQuantity(NetQuantityDto dto) {
+        if (dto == null) return null;
+        return new NetQuantity(dto.amount(), Unit.fromString(dto.unit()));
+    }
+
+    private static NetQuantityDto toNetQuantityDto(NetQuantity netQuantity) {
+        if (netQuantity == null) return null;
+        return new NetQuantityDto(netQuantity.amount(), netQuantity.unit().getDisplayName());
+    }
+
     private static Barcode toBarcode(String value) {
         return value == null ? null : new Barcode(value);
     }
 
     private static Set<ProductResponse.CategorySummary> mapToUUID(Set<ProductResult.CategorySummary> categories) {
+        if (categories == null) return null;
         return categories.stream()
                 .map(c -> new ProductResponse.CategorySummary(
                         c.id().getValue(),

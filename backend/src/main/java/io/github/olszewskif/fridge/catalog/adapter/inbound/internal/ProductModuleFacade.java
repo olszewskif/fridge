@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,11 @@ class ProductModuleFacade implements ProductInternalApi {
 
     @Override
     public ResolveProductsResponse resolveProducts(ResolveProductsRequest request) {
+        if ((request.search() == null || request.search().isBlank()) &&
+            (request.categoryIds() == null || request.categoryIds().isEmpty())) {
+            return new ResolveProductsResponse(Collections.emptySet());
+        }
+
         Set<CategoryId> categoryIds = request.categoryIds() == null ? null
                 : request.categoryIds().stream()
                 .map(CategoryId::of)
@@ -32,8 +38,6 @@ class ProductModuleFacade implements ProductInternalApi {
         var filters = new ProductFilterQuery(request.search(), categoryIds);
 
         Set<ProductResult> products = productUseCase.getProducts(filters);
-
-        log.info("{}", products);
 
         return new ResolveProductsResponse(products.stream().map(p ->
                 new ResolveProductsResponse.ProductSummary(

@@ -1,6 +1,5 @@
 package io.github.olszewskif.fridge.inventory.adapter.inbound.web.mapper;
 
-import io.github.olszewskif.fridge.catalog.domain.ProductFilterQuery;
 import io.github.olszewskif.fridge.inventory.adapter.inbound.web.dto.*;
 import io.github.olszewskif.fridge.inventory.application.dto.*;
 import io.github.olszewskif.fridge.inventory.domain.*;
@@ -18,7 +17,7 @@ public final class FridgeItemWebMapper {
                 result.productId().getValue(),
                 result.addedBy().getValue(),
                 result.addedAt(),
-                new AmountDto(result.amount().quantity(), result.amount().unit().getName()),
+                result.quantity().value(),
                 result.expiryDate() == null ? null : result.expiryDate().value()
         );
     }
@@ -27,7 +26,7 @@ public final class FridgeItemWebMapper {
         return new AddFridgeItemCommand(
                 FridgeId.of(fridgeId),
                 request.productId() == null ? null : ProductId.of(request.productId()),
-                request.amount() == null ? null :new Amount(request.amount().quantity(), Unit.fromString(request.amount().unit())),
+                new Quantity(request.quantity()),
                 request.expiryDate() == null ? null : new ExpiryDate(request.expiryDate())
         );
     }
@@ -36,7 +35,7 @@ public final class FridgeItemWebMapper {
         return new UpdateFridgeItemCommand(
                 FridgeId.of(fridgeId),
                 FridgeItemId.of(itemId),
-                request.amount() == null ? null : new Amount(request.amount().quantity(), Unit.fromString(request.amount().unit())),
+                request.quantity() == null ? null : new Quantity(request.quantity()),
                 request.expiryDate() == null ? null : new ExpiryDate(request.expiryDate())
         );
     }

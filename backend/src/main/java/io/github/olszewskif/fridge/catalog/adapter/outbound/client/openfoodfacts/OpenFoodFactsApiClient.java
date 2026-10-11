@@ -4,6 +4,8 @@ import io.github.olszewskif.fridge.catalog.adapter.outbound.client.openfoodfacts
 import io.github.olszewskif.fridge.catalog.application.dto.ExternalProduct;
 import io.github.olszewskif.fridge.catalog.application.port.OpenFoodFactsApi;
 import io.github.olszewskif.fridge.catalog.domain.Barcode;
+import io.github.olszewskif.fridge.catalog.domain.NetQuantity;
+import io.github.olszewskif.fridge.catalog.domain.Unit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,9 +28,8 @@ public class OpenFoodFactsApiClient implements OpenFoodFactsApi {
 
     @Override
     public Optional<ExternalProduct> findByBarcode(Barcode barcode) {
-        ExternalProductData data = restTemplate.getForObject(openFoodFactsUrl + "/product/" + barcode.value(),
-                ExternalProductData.class);
-        log.info("Response: {}", data);
+        String url = openFoodFactsUrl + "/product/" + barcode.value();
+        ExternalProductData data = restTemplate.getForObject(url, ExternalProductData.class);
 
         if (data == null || data.status() == null || !data.status().startsWith("success")) {
             return Optional.empty();
@@ -40,6 +41,7 @@ public class OpenFoodFactsApiClient implements OpenFoodFactsApi {
                 data.product().name() == null ? "Unknown" : data.product().name(),
                 data.product().brand(),
                 barcode,
+                toNetQuantity(data.product().amount(), data.product().unit()),
                 data.product().imageUrl(),
                 categories
         ));
@@ -54,5 +56,13 @@ public class OpenFoodFactsApiClient implements OpenFoodFactsApi {
                 .trim())
             .filter(s -> !s.isEmpty())
             .collect(Collectors.toSet());
+    }
+
+    private static NetQuantity toNetQuantity(Double amount, String unit) {
+        if (amount == null || amount <= 0 || unit == null || unit.isBlank()) {
+            return null;
+        }
+        return Unit.find(unit).map(u -> new NetQuantity(amount, u))
+                .orElse(null);
     }
 }

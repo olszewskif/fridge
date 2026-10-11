@@ -9,7 +9,7 @@ public record FridgeItemResponse(
         UUID productId,
         UUID addedBy,
         Instant addedAt,
-        AmountDto amount,
+        int quantity,
         LocalDate expiryDate
 ) {
 }

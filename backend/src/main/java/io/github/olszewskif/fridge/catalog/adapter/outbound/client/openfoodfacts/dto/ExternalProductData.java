@@ -12,6 +12,8 @@ public record ExternalProductData(
             @JsonProperty("product_name") String name,
             @JsonProperty("brands") String brand,
             @JsonProperty("image_front_url") String imageUrl,
-            @JsonProperty("categories_tags") Set<String> categories
+            @JsonProperty("categories_tags") Set<String> categories,
+            @JsonProperty("product_quantity") Double amount,
+            @JsonProperty("product_quantity_unit") String unit
     ) {}
 }

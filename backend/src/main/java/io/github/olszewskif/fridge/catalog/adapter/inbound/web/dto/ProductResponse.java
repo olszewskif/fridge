@@ -8,6 +8,7 @@ public record ProductResponse(
         String name,
         String brand,
         String barcode,
+        NetQuantityDto netQuantityDto,
         String imageUrl,
         Set<CategorySummary> categories
 ) {

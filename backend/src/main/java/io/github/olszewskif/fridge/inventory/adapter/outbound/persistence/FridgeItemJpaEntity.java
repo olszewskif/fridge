@@ -2,6 +2,7 @@ package io.github.olszewskif.fridge.inventory.adapter.outbound.persistence;
 
 import io.github.olszewskif.fridge.shared.adapter.outbound.persistence.JpaEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,10 +33,8 @@ public class FridgeItemJpaEntity extends JpaEntity {
     private Instant addedAt;
 
     @Column(nullable = false)
+    @Min(1)
     private int quantity;
-
-    @Column(nullable = false)
-    private String unit;
 
     private LocalDate expiryDate;
 }

@@ -1,6 +1,7 @@
 package io.github.olszewskif.fridge.inventory.application.dto;
 
 import io.github.olszewskif.fridge.inventory.domain.*;
+import jakarta.annotation.Nullable;
 
 import java.time.Instant;
 
@@ -9,7 +10,7 @@ public record FridgeItemResult(
         ProductId productId,
         UserId addedBy,
         Instant addedAt,
-        Amount amount,
-        ExpiryDate expiryDate
+        Quantity quantity,
+        @Nullable ExpiryDate expiryDate
 ) {
 }

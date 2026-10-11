@@ -17,6 +17,7 @@ public final class ProductAppMapper {
                 product.getName(),
                 product.getBrand(),
                 product.getBarcode(),
+                product.getNetQuantity(),
                 product.getImageUrl(),
                 mapToSummary(categories)
         );

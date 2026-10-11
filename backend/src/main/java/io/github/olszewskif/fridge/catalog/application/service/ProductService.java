@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Service
@@ -73,6 +74,7 @@ public class ProductService implements ProductUseCase {
                 command.name(),
                 command.brand(),
                 command.barcode(),
+                command.netQuantity(),
                 command.imageUrl(),
                 command.categoryIds()
         );
@@ -84,10 +86,11 @@ public class ProductService implements ProductUseCase {
     public ProductResult updateProduct(UpdateProductCommand command) {
         Product product = productRepository.findById(command.id())
                 .orElseThrow(() -> new ProductNotFoundException(command.id()));
-        if (command.name() != null) product.updateName(command.name());
-        if (command.brand() != null) product.updateBrand(command.brand());
-        if (command.barcode() != null) product.updateBarcode(command.barcode());
-        if (command.imageUrl() != null) product.updateImageUrl(command.imageUrl());
+        update(command.name(), product::updateName);
+        update(command.brand(), product::updateBrand);
+        update(command.barcode(), product::updateBarcode);
+        update(command.netQuantity(), product::updateNetQuantity);
+        update(command.imageUrl(), product::updateImageUrl);
         return toResult(productRepository.save(product));
     }
 
@@ -141,6 +144,7 @@ public class ProductService implements ProductUseCase {
                 externalProduct.name(),
                 externalProduct.brand(),
                 barcode,
+                externalProduct.netQuantity(),
                 externalProduct.imageUrl(),
                 categories.stream().map(Entity::getId).collect(Collectors.toSet())
         );
@@ -167,5 +171,11 @@ public class ProductService implements ProductUseCase {
 
     private Set<Category> resolveCategoryNames(Set<String> names) {
         return categoryRepository.findAllByNames(names);
+    }
+
+    private static <T> void update(T field, Consumer<T> consumer) {
+        if (field != null) {
+            consumer.accept(field);
+        }
     }
 }

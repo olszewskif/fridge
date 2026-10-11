@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,10 @@ public class FridgeItemQueryService implements FridgeItemQueryUseCase {
 
             allProducts = res.products().stream().map(p -> p.productId())
                     .collect(Collectors.toSet());
+
+            if (allProducts.isEmpty()) {
+                return new PageResult<>(List.of(), pageQuery.page(), pageQuery.size(), 0);
+            }
         }
 
         var filterQuery = new ResolvedFridgeItemsFilterQuery(

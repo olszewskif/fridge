@@ -26,7 +26,7 @@ public class FridgeItemCommandService implements FridgeItemCommandUseCase {
         Fridge fridge = getFridgeById(command.fridgeId());
         UserId mockUserId = UserId.generate();
 
-        FridgeItem item = fridge.addItem(command.productId(), mockUserId, command.amount(), command.expiryDate());
+        FridgeItem item = fridge.addItem(command.productId(), mockUserId, command.quantity(), command.expiryDate());
         fridgeRepository.save(fridge);
 
         return itemMapper.toResult(item);
@@ -35,7 +35,7 @@ public class FridgeItemCommandService implements FridgeItemCommandUseCase {
     @Override
     public FridgeItemResult updateItem(UpdateFridgeItemCommand command) {
         Fridge fridge = getFridgeById(command.fridgeId());
-        if (command.amount() != null) fridge.changeItemAmount(command.itemId(), command.amount());
+        if (command.quantity() != null) fridge.changeItemQuantity(command.itemId(), command.quantity());
         if (command.expiryDate() != null) fridge.changeItemExpiryDate(command.itemId(), command.expiryDate());
         fridgeRepository.save(fridge);
         return itemMapper.toResult(fridge.getItem(command.itemId()));

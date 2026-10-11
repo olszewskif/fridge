@@ -2,6 +2,7 @@ package io.github.olszewskif.fridge.inventory.domain;
 
 import io.github.olszewskif.fridge.inventory.domain.exception.FridgeItemNotFoundException;
 import io.github.olszewskif.fridge.shared.domain.AggregateRoot;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import lombok.Getter;
 
@@ -10,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Getter
 public final class Fridge extends AggregateRoot<FridgeId> {
 
     private String name;
@@ -43,6 +43,22 @@ public final class Fridge extends AggregateRoot<FridgeId> {
         return new Fridge(id, name, createdAt, createdBy, fridgeItems);
     }
 
+    @Nonnull public String getName() {
+        return name;
+    }
+
+    @Nonnull public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    @Nonnull public UserId getCreatedBy() {
+        return createdBy;
+    }
+
+    @Nonnull public List<FridgeItem> getItems() {
+        return List.copyOf(this.items);
+    }
+
     public void changeName(String newName) {
         if (newName == null || newName.isBlank()) {
             throw new IllegalArgumentException("Name cannot be null or blank!");
@@ -50,9 +66,9 @@ public final class Fridge extends AggregateRoot<FridgeId> {
         this.name = newName;
     }
 
-    public FridgeItem addItem(ProductId productId, UserId addedBy, Amount amount,
+    public FridgeItem addItem(ProductId productId, UserId addedBy, Quantity quantity,
                            @Nullable ExpiryDate expiryDate) {
-        FridgeItem item = FridgeItem.create(productId, addedBy, amount, expiryDate);
+        FridgeItem item = FridgeItem.create(productId, addedBy, quantity, expiryDate);
         this.items.add(item);
         return item;
     }
@@ -64,9 +80,9 @@ public final class Fridge extends AggregateRoot<FridgeId> {
         }
     }
 
-    public void changeItemAmount(FridgeItemId id, Amount amount) {
+    public void changeItemQuantity(FridgeItemId id, Quantity quantity) {
         FridgeItem item = getItem(id);
-        item.changeAmount(amount);
+        item.changeQuantity(quantity);
     }
 
     public void changeItemExpiryDate(FridgeItemId id, @Nullable ExpiryDate expiryDate) {
@@ -81,7 +97,4 @@ public final class Fridge extends AggregateRoot<FridgeId> {
                 .orElseThrow(() -> new FridgeItemNotFoundException(id));
     }
 
-    public List<FridgeItem> getItems() {
-        return List.copyOf(this.items);
-    }
 }

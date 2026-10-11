@@ -1,5 +1,6 @@
 package io.github.olszewskif.fridge.inventory.adapter.outbound.persistence.mapper;
 
+import io.github.olszewskif.fridge.catalog.domain.Unit;
 import io.github.olszewskif.fridge.inventory.adapter.outbound.persistence.FridgeItemJpaEntity;
 import io.github.olszewskif.fridge.inventory.application.dto.FridgeItemResult;
 import io.github.olszewskif.fridge.inventory.domain.*;
@@ -14,7 +15,7 @@ public final class FridgeItemJpaMapper {
                 ProductId.of(e.getProductId()),
                 UserId.of(e.getAddedBy()),
                 e.getAddedAt(),
-                new Amount(e.getQuantity(), Unit.fromString(e.getUnit())),
+                new Quantity(e.getQuantity()),
                 e.getExpiryDate() == null ? null : new ExpiryDate(e.getExpiryDate()));
     }
 
@@ -24,8 +25,7 @@ public final class FridgeItemJpaMapper {
         entity.setProductId(item.getProductId().getValue());
         entity.setAddedBy(item.getAddedBy().getValue());
         entity.setAddedAt(item.getAddedAt());
-        entity.setQuantity(item.getAmount().quantity());
-        entity.setUnit(item.getAmount().unit().getName());
+        entity.setQuantity(item.getQuantity().value());
         entity.setExpiryDate(item.getExpiryDate() != null ? item.getExpiryDate().value() : null);
         return entity;
     }
@@ -36,14 +36,13 @@ public final class FridgeItemJpaMapper {
                 ProductId.of(entity.getProductId()),
                 UserId.of(entity.getAddedBy()),
                 entity.getAddedAt(),
-                new Amount(entity.getQuantity(), Unit.fromString(entity.getUnit())),
+                new Quantity(entity.getQuantity()),
                 entity.getExpiryDate() != null ? new ExpiryDate(entity.getExpiryDate()) : null
         );
     }
 
     public void updateJpaEntity(FridgeItem fridgeItem, FridgeItemJpaEntity jpaEntity) {
-        jpaEntity.setQuantity(fridgeItem.getAmount().quantity());
-        jpaEntity.setUnit(fridgeItem.getAmount().unit().getName());
+        jpaEntity.setQuantity(fridgeItem.getQuantity().value());
         if (fridgeItem.getExpiryDate() != null) {
             jpaEntity.setExpiryDate(fridgeItem.getExpiryDate().value());
         }
