@@ -1,11 +1,11 @@
 package io.github.olszewskif.fridge.catalog.domain;
 
-import io.github.olszewskif.fridge.shared.domain.PageQuery;
+import jakarta.annotation.Nullable;
 
 import java.util.Set;
 
 public record ProductFilterQuery(
-        String search,
-        Set<CategoryId> categoryIds
+        @Nullable String search,
+        @Nullable Set<CategoryId> categoryIds
 ) {
 }

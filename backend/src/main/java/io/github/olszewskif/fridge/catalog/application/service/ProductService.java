@@ -14,12 +14,10 @@ import io.github.olszewskif.fridge.shared.domain.PageQuery;
 import io.github.olszewskif.fridge.shared.domain.PageResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,18 +30,20 @@ public class ProductService implements ProductUseCase {
     private final ProductAppMapper mapper;
     private final OpenFoodFactsApi openFoodFactsApi;
 
-    @Transactional(readOnly = true)
     @Override
+    @Transactional(readOnly = true)
     public ProductResult getProduct(ProductId id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
         return toResult(product);
     }
 
-    @Transactional(readOnly = true)
     @Override
-    public PageResult<ProductResult> getProducts(ProductFilterQuery filters,
-                                                 PageQuery pageQuery) {
+    @Transactional(readOnly = true)
+    public PageResult<ProductResult> getProducts(
+            ProductFilterQuery filters,
+            PageQuery pageQuery
+    ) {
         PageResult<Product> page = productRepository.findAll(filters, pageQuery);
 
         // Aggregate and query all categories at once
@@ -57,6 +57,14 @@ public class ProductService implements ProductUseCase {
                 .map(categoryMap::get)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet())));
+    }
+
+    @Override
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
+    public Set<ProductResult> getProducts(ProductFilterQuery filters) {
+        return productRepository.findAll(filters).stream()
+                .map(this::toResult)
+                .collect(Collectors.toSet());
     }
 
     @Override

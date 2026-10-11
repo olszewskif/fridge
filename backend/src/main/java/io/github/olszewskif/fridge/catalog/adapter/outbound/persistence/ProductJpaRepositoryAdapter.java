@@ -18,7 +18,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -46,6 +49,13 @@ public class ProductJpaRepositoryAdapter implements ProductRepository {
         Page<ProductJpaEntity> page = jpaRepository.findAll(spec, pageable);
         return commonJpaMapper.toPageResult(page)
                 .map(mapper::toDomainEntity);
+    }
+
+    @Override
+    public Set<Product> findAll(ProductFilterQuery filters) {
+        return jpaRepository.findAll(specifications.build(filters))
+                .stream().map(mapper::toDomainEntity)
+                .collect(Collectors.toSet());
     }
 
     @Override

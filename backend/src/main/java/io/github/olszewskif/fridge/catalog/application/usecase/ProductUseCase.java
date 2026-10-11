@@ -7,9 +7,12 @@ import io.github.olszewskif.fridge.catalog.domain.ProductId;
 import io.github.olszewskif.fridge.shared.domain.PageQuery;
 import io.github.olszewskif.fridge.shared.domain.PageResult;
 
+import java.util.Set;
+
 public interface ProductUseCase {
     ProductResult getProduct(ProductId id);
     PageResult<ProductResult> getProducts(ProductFilterQuery filters, PageQuery pageQuery);
+    Set<ProductResult> getProducts(ProductFilterQuery filters);
     ProductResult createProduct(CreateProductCommand command);
     ProductResult updateProduct(UpdateProductCommand command);
     void deleteProduct(ProductId id);

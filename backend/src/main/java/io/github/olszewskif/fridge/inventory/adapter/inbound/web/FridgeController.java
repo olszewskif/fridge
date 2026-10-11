@@ -1,5 +1,6 @@
 package io.github.olszewskif.fridge.inventory.adapter.inbound.web;
 
+import io.github.olszewskif.fridge.catalog.domain.ProductFilterQuery;
 import io.github.olszewskif.fridge.inventory.adapter.inbound.web.dto.*;
 import io.github.olszewskif.fridge.inventory.adapter.inbound.web.mapper.FridgeItemWebMapper;
 import io.github.olszewskif.fridge.inventory.adapter.inbound.web.mapper.FridgeWebMapper;
@@ -9,6 +10,7 @@ import io.github.olszewskif.fridge.inventory.application.usecase.FridgeItemQuery
 import io.github.olszewskif.fridge.inventory.application.usecase.FridgeUseCase;
 import io.github.olszewskif.fridge.inventory.domain.*;
 import io.github.olszewskif.fridge.shared.adapter.inbound.web.mapper.CommonWebMapper;
+import io.github.olszewskif.fridge.shared.domain.PageQuery;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -74,9 +76,12 @@ public class FridgeController {
     }
 
     @GetMapping("/{id}/items")
-    public Page<FridgeItemResponse> getItems(@PathVariable UUID id, Pageable pageable) {
-        var query = new GetFridgeItemsQuery(FridgeId.of(id), commonWebMapper.toPageQuery(pageable));
-        var pageRes = fridgeItemQueryUseCase.getItems(query).map(fridgeItemMapper::toResponse);
+    public Page<FridgeItemResponse> getItems(@PathVariable UUID id, FridgeItemsFilterRequest request,
+                                             Pageable pageable) {
+        PageQuery pageQuery = commonWebMapper.toPageQuery(pageable);
+        FridgeItemsFilterQuery filters = fridgeItemMapper.toFilterQuery(id, request);
+        var pageRes = fridgeItemQueryUseCase.getItems(filters, pageQuery)
+                .map(fridgeItemMapper::toResponse);
         return commonWebMapper.toPage(pageRes, pageable);
     }
 
@@ -84,22 +89,14 @@ public class FridgeController {
     @ResponseStatus(HttpStatus.CREATED)
     public FridgeItemResponse addItem(@PathVariable UUID id,
                                       @RequestBody @Valid AddFridgeItemRequest request) {
-        var cmd = new AddFridgeItemCommand(
-                FridgeId.of(id),
-                ProductId.of(request.productId()),
-                new Amount(request.amount().quantity(), Unit.fromString(request.amount().unit())),
-                request.expiryDate() == null ? null : new ExpiryDate(request.expiryDate()));
+        var cmd = fridgeItemMapper.toCommand(id, request);
         return fridgeItemMapper.toResponse(fridgeItemCommandUseCase.addItem(cmd));
     }
 
     @PatchMapping("/{id}/items/{itemId}")
     public FridgeItemResponse updateItem(@PathVariable UUID id, @PathVariable UUID itemId,
                                          @RequestBody @Valid UpdateFridgeItemRequest request) {
-        var cmd = new UpdateFridgeItemCommand(
-                FridgeId.of(id),
-                FridgeItemId.of(itemId),
-                new Amount(request.amount().quantity(), Unit.fromString(request.amount().unit())),
-                request.expiryDate() == null ? null : new ExpiryDate(request.expiryDate()));
+        var cmd = fridgeItemMapper.toCommand(id, itemId, request);
         return fridgeItemMapper.toResponse(fridgeItemCommandUseCase.updateItem(cmd));
     }
 

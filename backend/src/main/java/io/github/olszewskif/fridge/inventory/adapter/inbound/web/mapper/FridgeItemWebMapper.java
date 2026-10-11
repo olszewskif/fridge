@@ -1,11 +1,13 @@
 package io.github.olszewskif.fridge.inventory.adapter.inbound.web.mapper;
 
+import io.github.olszewskif.fridge.catalog.domain.ProductFilterQuery;
 import io.github.olszewskif.fridge.inventory.adapter.inbound.web.dto.*;
-import io.github.olszewskif.fridge.inventory.application.dto.CreateFridgeCommand;
-import io.github.olszewskif.fridge.inventory.application.dto.FridgeItemResult;
-import io.github.olszewskif.fridge.inventory.application.dto.FridgeResult;
-import io.github.olszewskif.fridge.inventory.application.dto.UpdateFridgeCommand;
+import io.github.olszewskif.fridge.inventory.application.dto.*;
+import io.github.olszewskif.fridge.inventory.domain.*;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public final class FridgeItemWebMapper {
@@ -21,15 +23,34 @@ public final class FridgeItemWebMapper {
         );
     }
 
-    public CreateFridgeCommand toCommand(CreateFridgeRequest request) {
-        return new CreateFridgeCommand(
-                request.name()
+    public AddFridgeItemCommand toCommand(UUID fridgeId, AddFridgeItemRequest request) {
+        return new AddFridgeItemCommand(
+                FridgeId.of(fridgeId),
+                request.productId() == null ? null : ProductId.of(request.productId()),
+                request.amount() == null ? null :new Amount(request.amount().quantity(), Unit.fromString(request.amount().unit())),
+                request.expiryDate() == null ? null : new ExpiryDate(request.expiryDate())
         );
     }
 
-    public UpdateFridgeCommand toCommand(UpdateFridgeRequest request) {
-        return new UpdateFridgeCommand(
-                request.name()
+    public UpdateFridgeItemCommand toCommand(UUID fridgeId, UUID itemId, UpdateFridgeItemRequest request) {
+        return new UpdateFridgeItemCommand(
+                FridgeId.of(fridgeId),
+                FridgeItemId.of(itemId),
+                request.amount() == null ? null : new Amount(request.amount().quantity(), Unit.fromString(request.amount().unit())),
+                request.expiryDate() == null ? null : new ExpiryDate(request.expiryDate())
+        );
+    }
+
+    public FridgeItemsFilterQuery toFilterQuery(UUID id, FridgeItemsFilterRequest request) {
+        return new FridgeItemsFilterQuery(
+                id == null ? null : FridgeId.of(id),
+                request.isExpired(),
+                request.expiresInDays(),
+                request.productId() == null ? null : ProductId.of(request.productId()),
+                request.categoryIds() == null ? null : request.categoryIds().stream()
+                        .map(CategoryId::of).collect(Collectors.toSet()),
+                request.addedBy() == null ? null : UserId.of(request.addedBy()),
+                request.search()
         );
     }
 }
