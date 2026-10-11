@@ -15,8 +15,6 @@ import {
   Flame,
   Camera,
   ArrowRight,
-  ShieldCheck,
-  Plus,
 } from 'lucide-react-native';
 import { Theme } from '../../constants/theme';
 import { useFridgeStore } from '../../store/useFridgeStore';
@@ -37,7 +35,6 @@ export default function HomeScreen() {
 
   const items = itemsPage?.content || [];
 
-  // Metric computations
   const totalItems = itemsPage?.totalElements || items.length;
 
   const today = new Date();
@@ -73,136 +70,175 @@ export default function HomeScreen() {
           />
         }
       >
-        {/* Metric Overview Cards */}
+        {/* Metric Overview Cards: Lean, flattened, and directly filterable */}
         <View style={styles.metricsGrid}>
           {/* Total Items */}
-          <View style={styles.metricCard}>
-            <View style={styles.metricIconWrap}>
-              <Package size={20} color={Theme.colors.primary} />
+          <TouchableOpacity
+            style={styles.metricCard}
+            onPress={() =>
+              router.push({
+                pathname: '/(tabs)/inventory',
+                params: { expiryFilter: 'ALL' },
+              })
+            }
+            activeOpacity={0.7}
+          >
+            <View style={styles.metricHeaderRow}>
+              <Text style={styles.metricVal}>{totalItems}</Text>
+              <Package size={14} color={Theme.colors.primaryLight} />
             </View>
-            <Text style={styles.metricVal}>{totalItems}</Text>
-            <Text style={styles.metricLabel}>Total Items</Text>
-          </View>
+            <Text style={styles.metricLabel} numberOfLines={1}>
+              Total Stock
+            </Text>
+          </TouchableOpacity>
 
           {/* Expiring Soon */}
-          <View style={[styles.metricCard, expiringSoonCount > 0 && styles.metricCardExpiring]}>
-            <View
-              style={[
-                styles.metricIconWrap,
-                expiringSoonCount > 0 && { backgroundColor: Theme.colors.expiringSoonBg },
-              ]}
-            >
+          <TouchableOpacity
+            style={[
+              styles.metricCard,
+              expiringSoonCount > 0 && styles.metricCardExpiring,
+            ]}
+            onPress={() =>
+              router.push({
+                pathname: '/(tabs)/inventory',
+                params: { expiryFilter: 'EXPIRING_SOON' },
+              })
+            }
+            activeOpacity={0.7}
+          >
+            <View style={styles.metricHeaderRow}>
+              <Text
+                style={[
+                  styles.metricVal,
+                  expiringSoonCount > 0 && { color: Theme.colors.expiringSoon },
+                ]}
+              >
+                {expiringSoonCount}
+              </Text>
               <AlertTriangle
-                size={20}
+                size={14}
                 color={expiringSoonCount > 0 ? Theme.colors.expiringSoon : Theme.colors.textMuted}
               />
             </View>
-            <Text
-              style={[
-                styles.metricVal,
-                expiringSoonCount > 0 && { color: Theme.colors.expiringSoon },
-              ]}
-            >
-              {expiringSoonCount}
+            <Text style={styles.metricLabel} numberOfLines={1}>
+              Expiring
             </Text>
-            <Text style={styles.metricLabel}>Expiring Soon</Text>
-          </View>
+          </TouchableOpacity>
 
           {/* Expired */}
-          <View style={[styles.metricCard, expiredCount > 0 && styles.metricCardExpired]}>
-            <View
-              style={[
-                styles.metricIconWrap,
-                expiredCount > 0 && { backgroundColor: Theme.colors.expiredBg },
-              ]}
-            >
+          <TouchableOpacity
+            style={[styles.metricCard, expiredCount > 0 && styles.metricCardExpired]}
+            onPress={() =>
+              router.push({
+                pathname: '/(tabs)/inventory',
+                params: { expiryFilter: 'EXPIRED' },
+              })
+            }
+            activeOpacity={0.7}
+          >
+            <View style={styles.metricHeaderRow}>
+              <Text
+                style={[
+                  styles.metricVal,
+                  expiredCount > 0 && { color: Theme.colors.expired },
+                ]}
+              >
+                {expiredCount}
+              </Text>
               <Flame
-                size={20}
+                size={14}
                 color={expiredCount > 0 ? Theme.colors.expired : Theme.colors.textMuted}
               />
             </View>
-            <Text style={[styles.metricVal, expiredCount > 0 && { color: Theme.colors.expired }]}>
-              {expiredCount}
+            <Text style={styles.metricLabel} numberOfLines={1}>
+              Expired
             </Text>
-            <Text style={styles.metricLabel}>Expired</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
-        {/* Action Banners */}
-        {expiredCount > 0 && (
+        {/* Actionable Expiry Banner (Navigates with direct filter) */}
+        {expiredCount > 0 ? (
           <TouchableOpacity
-            style={styles.alertBanner}
-            onPress={() => router.push('/(tabs)/inventory')}
+            style={styles.alertBannerExpired}
+            onPress={() =>
+              router.push({
+                pathname: '/(tabs)/inventory',
+                params: { expiryFilter: 'EXPIRED' },
+              })
+            }
             activeOpacity={0.8}
           >
             <View style={styles.alertBannerContent}>
-              <Flame size={20} color={Theme.colors.expired} />
-              <Text style={styles.alertBannerText}>
-                {expiredCount} {expiredCount === 1 ? 'item has' : 'items have'} expired! Check
-                inventory.
+              <Flame size={16} color={Theme.colors.expired} />
+              <Text style={styles.alertBannerTextExpired}>
+                {expiredCount} {expiredCount === 1 ? 'item has' : 'items have'} expired. Tap to view.
               </Text>
             </View>
-            <ArrowRight size={18} color={Theme.colors.expired} />
+            <ArrowRight size={14} color={Theme.colors.expired} />
           </TouchableOpacity>
-        )}
-
-        {/* Quick Launch Buttons */}
-        <View style={styles.quickLaunchRow}>
+        ) : expiringSoonCount > 0 ? (
           <TouchableOpacity
-            style={styles.launchCardPrimary}
-            onPress={() => router.push('/scan')}
+            style={styles.alertBannerExpiring}
+            onPress={() =>
+              router.push({
+                pathname: '/(tabs)/inventory',
+                params: { expiryFilter: 'EXPIRING_SOON' },
+              })
+            }
             activeOpacity={0.8}
           >
-            <View style={styles.launchIconCircle}>
-              <Camera size={22} color="#fff" />
+            <View style={styles.alertBannerContent}>
+              <AlertTriangle size={16} color={Theme.colors.expiringSoon} />
+              <Text style={styles.alertBannerTextExpiring}>
+                {expiringSoonCount} {expiringSoonCount === 1 ? 'item expires' : 'items expire'} soon. Tap to review.
+              </Text>
             </View>
-            <View>
-              <Text style={styles.launchTitlePrimary}>Scan Barcode</Text>
-              <Text style={styles.launchSubtitlePrimary}>Quickly add groceries</Text>
-            </View>
+            <ArrowRight size={14} color={Theme.colors.expiringSoon} />
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.launchCardSecondary}
-            onPress={() => router.push('/(tabs)/inventory')}
-            activeOpacity={0.8}
-          >
-            <View style={styles.launchIconCircleSec}>
-              <Package size={22} color={Theme.colors.primary} />
-            </View>
-            <View>
-              <Text style={styles.launchTitleSecondary}>Open Inventory</Text>
-              <Text style={styles.launchSubtitleSecondary}>Search & filter items</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
+        ) : null}
 
         {/* Recent Items Section */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>RECENT ITEMS IN FRIDGE</Text>
-          <TouchableOpacity onPress={() => router.push('/(tabs)/inventory')}>
-            <Text style={styles.seeAllLink}>View All ({totalItems})</Text>
-          </TouchableOpacity>
+          <Text style={styles.sectionTitle}>RECENT ITEMS</Text>
+          {totalItems > 0 && (
+            <TouchableOpacity
+              onPress={() =>
+                router.push({
+                  pathname: '/(tabs)/inventory',
+                  params: { expiryFilter: 'ALL' },
+                })
+              }
+              hitSlop={8}
+            >
+              <Text style={styles.seeAllLink}>View All ({totalItems})</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {isLoading ? (
-          <ActivityIndicator color={Theme.colors.primary} style={{ marginVertical: 32 }} />
+          <ActivityIndicator color={Theme.colors.primary} style={{ marginVertical: 36 }} />
         ) : items.length === 0 ? (
           <View style={styles.emptyState}>
-            <Package size={40} color={Theme.colors.surfaceBorder} />
-            <Text style={styles.emptyTitle}>This fridge is empty</Text>
+            <View style={styles.emptyIconCircle}>
+              <Package size={36} color={Theme.colors.surfaceBorder} />
+            </View>
+            <Text style={styles.emptyTitle}>Your fridge is empty</Text>
             <Text style={styles.emptyDesc}>
-              Scan barcodes to populate your fridge with ingredients!
+              Scan barcodes to stock ingredients into {activeFridge?.name || 'your fridge'}.
             </Text>
-            <TouchableOpacity style={styles.emptyScanBtn} onPress={() => router.push('/scan')}>
+            <TouchableOpacity
+              style={styles.emptyScanBtn}
+              onPress={() => router.push('/scan')}
+              activeOpacity={0.8}
+            >
               <Camera size={18} color="#fff" />
               <Text style={styles.emptyScanBtnText}>Scan First Item</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.recentItemsList}>
-            {items.slice(0, 5).map((item) => (
-              <FridgeItemCard key={item.id} item={item} />
+            {items.slice(0, 3).map((item, index) => (
+              <FridgeItemCard key={item.id} item={item} index={index} />
             ))}
           </View>
         )}
@@ -218,40 +254,41 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Theme.spacing.lg,
-    paddingBottom: 100, // accommodate bottom tab bar
+    paddingTop: Theme.spacing.xs,
+    paddingBottom: 110, // tab bar clearance
   },
   metricsGrid: {
     flexDirection: 'row',
-    gap: Theme.spacing.sm,
+    gap: 8,
     marginBottom: Theme.spacing.md,
   },
   metricCard: {
     flex: 1,
     backgroundColor: Theme.colors.surface,
-    padding: Theme.spacing.md,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     borderRadius: Theme.radius.lg,
     borderWidth: 1,
     borderColor: Theme.colors.surfaceBorder,
-    alignItems: 'center',
-    gap: 4,
+    justifyContent: 'space-between',
+    minHeight: 58,
   },
   metricCardExpiring: {
     borderColor: 'rgba(245, 158, 11, 0.4)',
+    backgroundColor: 'rgba(245, 158, 11, 0.08)',
   },
   metricCardExpired: {
     borderColor: 'rgba(239, 68, 68, 0.4)',
+    backgroundColor: 'rgba(239, 68, 68, 0.08)',
   },
-  metricIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(64, 0, 255, 0.1)',
+  metricHeaderRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
+    justifyContent: 'space-between',
+    marginBottom: 2,
   },
   metricVal: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '800',
     color: Theme.colors.text,
   },
@@ -259,17 +296,29 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Theme.colors.textSecondary,
     fontWeight: '600',
-    textAlign: 'center',
   },
-  alertBanner: {
+  alertBannerExpired: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: Theme.colors.expiredBg,
     borderWidth: 1,
-    borderColor: Theme.colors.expired,
-    padding: Theme.spacing.md,
-    borderRadius: Theme.radius.lg,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+    paddingHorizontal: Theme.spacing.md,
+    paddingVertical: 10,
+    borderRadius: Theme.radius.md,
+    marginBottom: Theme.spacing.md,
+  },
+  alertBannerExpiring: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: Theme.colors.expiringSoonBg,
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.3)',
+    paddingHorizontal: Theme.spacing.md,
+    paddingVertical: 10,
+    borderRadius: Theme.radius.md,
     marginBottom: Theme.spacing.md,
   },
   alertBannerContent: {
@@ -278,124 +327,75 @@ const styles = StyleSheet.create({
     gap: Theme.spacing.sm,
     flex: 1,
   },
-  alertBannerText: {
+  alertBannerTextExpired: {
     color: Theme.colors.expired,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
     flex: 1,
   },
-  quickLaunchRow: {
-    gap: Theme.spacing.sm,
-    marginBottom: Theme.spacing.lg,
-  },
-  launchCardPrimary: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Theme.colors.primary,
-    padding: Theme.spacing.md,
-    borderRadius: Theme.radius.lg,
-    gap: Theme.spacing.md,
-    shadowColor: Theme.colors.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 6,
-  },
-  launchIconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  launchTitlePrimary: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  launchSubtitlePrimary: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 13,
-  },
-  launchCardSecondary: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Theme.colors.surface,
-    padding: Theme.spacing.md,
-    borderRadius: Theme.radius.lg,
-    borderWidth: 1,
-    borderColor: Theme.colors.surfaceBorder,
-    gap: Theme.spacing.md,
-  },
-  launchIconCircleSec: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(64, 0, 255, 0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  launchTitleSecondary: {
-    color: Theme.colors.text,
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  launchSubtitleSecondary: {
-    color: Theme.colors.textSecondary,
-    fontSize: 13,
+  alertBannerTextExpiring: {
+    color: Theme.colors.expiringSoon,
+    fontSize: 12,
+    fontWeight: '600',
+    flex: 1,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginTop: Theme.spacing.sm,
     marginBottom: Theme.spacing.md,
-    marginTop: Theme.spacing.xs,
   },
   sectionTitle: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: Theme.colors.textSecondary,
-    letterSpacing: 0.8,
+    fontSize: 12,
+    fontWeight: '800',
+    color: Theme.colors.textMuted,
+    letterSpacing: 1,
   },
   seeAllLink: {
     fontSize: 13,
     fontWeight: '600',
-    color: Theme.colors.primary,
+    color: Theme.colors.primaryLight,
   },
   recentItemsList: {
-    gap: Theme.spacing.xs,
+    gap: 10,
   },
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: Theme.spacing.xl,
+    paddingVertical: 44,
+    gap: Theme.spacing.sm,
+  },
+  emptyIconCircle: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
     backgroundColor: Theme.colors.surface,
-    borderRadius: Theme.radius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
     borderWidth: 1,
     borderColor: Theme.colors.surfaceBorder,
-    gap: Theme.spacing.sm,
-    marginTop: Theme.spacing.sm,
   },
   emptyTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     color: Theme.colors.text,
   },
   emptyDesc: {
-    fontSize: 13,
+    fontSize: 14,
     color: Theme.colors.textSecondary,
     textAlign: 'center',
-    maxWidth: 240,
-    lineHeight: 18,
+    maxWidth: 270,
+    lineHeight: 20,
   },
   emptyScanBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Theme.spacing.sm,
     backgroundColor: Theme.colors.primary,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     borderRadius: Theme.radius.md,
     marginTop: Theme.spacing.sm,
   },

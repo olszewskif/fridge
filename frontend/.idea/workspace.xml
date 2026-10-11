@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f9449f5d-372e-470f-9ac5-734be84a3136" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/io/github/olszewskif/fridge/catalog/adapter/inbound/internal/ProductModuleFacade.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/io/github/olszewskif/fridge/catalog/adapter/inbound/internal/ProductModuleFacade.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/client.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/client.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(tabs)/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(tabs)/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(tabs)/inventory.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(tabs)/inventory.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/fridges/components/FridgeHeader.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/fridges/components/FridgeHeader.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,7 +52,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1791732508068</updated>
-      <workItem from="1791732508964" duration="8466000" />
+      <workItem from="1791732508964" duration="9529000" />
     </task>
     <servers />
   </component>

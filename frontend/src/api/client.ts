@@ -8,6 +8,9 @@ export const apiClient = axios.create({
     'Content-Type': 'application/json',
     Accept: 'application/json',
   },
+  paramsSerializer: {
+    indexes: null, // Serializes arrays as ?categoryIds=1&categoryIds=2 instead of ?categoryIds[]=1 for Spring Boot compatibility
+  },
 });
 
 // Response interceptor for clear debugging in dev

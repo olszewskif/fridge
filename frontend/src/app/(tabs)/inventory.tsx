@@ -57,7 +57,11 @@ function calculateTargetIndex(
 
 export default function InventoryScreen() {
   const router = useRouter();
-  const routeParams = useLocalSearchParams<{ productId?: string; productName?: string }>();
+  const routeParams = useLocalSearchParams<{
+    productId?: string;
+    productName?: string;
+    expiryFilter?: ExpiryFilterType;
+  }>();
   const { activeFridge } = useFridgeStore();
   const { width: windowWidth } = useWindowDimensions();
 
@@ -67,7 +71,9 @@ export default function InventoryScreen() {
 
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [expiryFilter, setExpiryFilter] = useState<ExpiryFilterType>('ALL');
+  const [expiryFilter, setExpiryFilter] = useState<ExpiryFilterType>(
+    routeParams.expiryFilter || 'ALL'
+  );
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   const [addedBy, setAddedBy] = useState('');
   const [selectedProductId, setSelectedProductId] = useState<string | undefined>(
@@ -97,11 +103,14 @@ export default function InventoryScreen() {
   }, [search]);
 
   useEffect(() => {
+    if (routeParams.expiryFilter) {
+      setExpiryFilter(routeParams.expiryFilter);
+    }
     if (routeParams.productId) {
       setSelectedProductId(routeParams.productId);
       setSelectedProductName(routeParams.productName);
     }
-  }, [routeParams.productId, routeParams.productName]);
+  }, [routeParams.expiryFilter, routeParams.productId, routeParams.productName]);
 
   const handleCategoryToggle = (catId: string) => {
     setSelectedCategoryIds((prev) =>
@@ -438,7 +447,8 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: Theme.spacing.lg,
-    paddingBottom: 110, // tab bar clearance
+    paddingTop: Theme.spacing.sm,
+    paddingBottom: 120, // tab bar clearance
   },
   loadingContainer: {
     flex: 1,

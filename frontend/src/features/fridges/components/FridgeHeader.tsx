@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronDown, Refrigerator } from 'lucide-react-native';
+import { ChevronDown } from 'lucide-react-native';
 import { Theme } from '../../../constants/theme';
 import { useFridgeStore } from '../../../store/useFridgeStore';
 import { FridgeSwitcherModal } from './FridgeSwitcherModal';
@@ -14,22 +14,21 @@ export function FridgeHeader() {
   return (
     <>
       <View style={[styles.container, { paddingTop: Math.max(insets.top, 16) + 8 }]}>
-        <View>
-          <Text style={styles.eyebrow}>CURRENT FRIDGE</Text>
-          <TouchableOpacity
-            style={styles.selectorBtn}
-            onPress={() => setModalVisible(true)}
-            activeOpacity={0.7}
-          >
-            <Refrigerator size={20} color={Theme.colors.primary} />
-            <Text style={styles.fridgeName} numberOfLines={1}>
-              {activeFridge ? activeFridge.name : 'Select a Fridge'}
+        <TouchableOpacity
+          style={styles.headerBtn}
+          onPress={() => setModalVisible(true)}
+          activeOpacity={0.7}
+          hitSlop={12}
+        >
+          <View style={styles.titleRow}>
+            <Text style={styles.h1Title} numberOfLines={1}>
+              {activeFridge ? activeFridge.name : 'Select Fridge'}
             </Text>
-            <View style={styles.chevronWrap}>
-              <ChevronDown size={16} color={Theme.colors.textSecondary} />
+            <View style={styles.chevronPill}>
+              <ChevronDown size={18} color={Theme.colors.primaryLight} />
             </View>
-          </TouchableOpacity>
-        </View>
+          </View>
+        </TouchableOpacity>
       </View>
 
       <FridgeSwitcherModal visible={modalVisible} onClose={() => setModalVisible(false)} />
@@ -40,34 +39,30 @@ export function FridgeHeader() {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: Theme.spacing.lg,
-    paddingBottom: Theme.spacing.sm,
+    paddingBottom: Theme.spacing.md,
   },
-  eyebrow: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: Theme.colors.primary,
-    letterSpacing: 1,
-    marginBottom: 4,
+  headerBtn: {
+    alignSelf: 'flex-start',
   },
-  selectorBtn: {
+  titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Theme.spacing.sm,
-    alignSelf: 'flex-start',
+    gap: 10,
+  },
+  h1Title: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: Theme.colors.text,
+    letterSpacing: -0.6,
+  },
+  chevronPill: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: Theme.colors.surface,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: Theme.radius.full,
     borderWidth: 1,
     borderColor: Theme.colors.surfaceBorder,
-  },
-  fridgeName: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: Theme.colors.text,
-    maxWidth: 200,
-  },
-  chevronWrap: {
-    marginLeft: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
