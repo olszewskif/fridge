@@ -8,6 +8,7 @@ import io.github.olszewskif.fridge.catalog.domain.ProductFilterQuery;
 import io.github.olszewskif.fridge.catalog.domain.ProductId;
 import io.github.olszewskif.fridge.catalog.domain.port.ProductRepository;
 import io.github.olszewskif.fridge.shared.adapter.outbound.persistence.mapper.CommonJpaMapper;
+import io.github.olszewskif.fridge.shared.domain.DomainId;
 import io.github.olszewskif.fridge.shared.domain.PageQuery;
 import io.github.olszewskif.fridge.shared.domain.PageResult;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -55,6 +57,14 @@ public class ProductJpaRepositoryAdapter implements ProductRepository {
     public Set<Product> findAll(ProductFilterQuery filters) {
         return jpaRepository.findAll(specifications.build(filters))
                 .stream().map(mapper::toDomainEntity)
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<Product> findAllByIds(Set<ProductId> productIds) {
+        Set<UUID> uuids = productIds.stream().map(DomainId::getValue)
+                .collect(Collectors.toSet());
+        return jpaRepository.findAllById(uuids).stream().map(mapper::toDomainEntity)
                 .collect(Collectors.toSet());
     }
 

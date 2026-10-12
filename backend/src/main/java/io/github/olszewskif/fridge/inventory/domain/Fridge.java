@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public final class Fridge extends AggregateRoot<FridgeId> {
 
@@ -78,6 +79,10 @@ public final class Fridge extends AggregateRoot<FridgeId> {
         if (!removed) {
             throw new FridgeItemNotFoundException(id);
         }
+    }
+
+    public void removeItems(Set<FridgeItemId> ids) {
+        this.items.removeIf(i -> ids.contains(i.getId()));
     }
 
     public void changeItemQuantity(FridgeItemId id, Quantity quantity) {

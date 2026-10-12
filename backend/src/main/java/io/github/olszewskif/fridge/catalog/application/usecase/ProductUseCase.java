@@ -13,6 +13,7 @@ public interface ProductUseCase {
     ProductResult getProduct(ProductId id);
     PageResult<ProductResult> getProducts(ProductFilterQuery filters, PageQuery pageQuery);
     Set<ProductResult> getProducts(ProductFilterQuery filters);
+    Set<ProductResult> getProductsByIds(Set<ProductId> productIds);
     ProductResult createProduct(CreateProductCommand command);
     ProductResult updateProduct(UpdateProductCommand command);
     void deleteProduct(ProductId id);

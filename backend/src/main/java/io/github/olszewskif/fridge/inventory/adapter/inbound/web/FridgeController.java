@@ -1,6 +1,5 @@
 package io.github.olszewskif.fridge.inventory.adapter.inbound.web;
 
-import io.github.olszewskif.fridge.catalog.domain.ProductFilterQuery;
 import io.github.olszewskif.fridge.inventory.adapter.inbound.web.dto.*;
 import io.github.olszewskif.fridge.inventory.adapter.inbound.web.mapper.FridgeItemWebMapper;
 import io.github.olszewskif.fridge.inventory.adapter.inbound.web.mapper.FridgeWebMapper;
@@ -14,12 +13,12 @@ import io.github.olszewskif.fridge.shared.domain.PageQuery;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -105,6 +104,14 @@ public class FridgeController {
     public void removeItem(@PathVariable UUID id, @PathVariable UUID itemId) {
         var cmd = new RemoveFridgeItemCommand(FridgeId.of(id), FridgeItemId.of(itemId));
         fridgeItemCommandUseCase.removeItem(cmd);
+    }
+
+    @PostMapping("/{id}/items/bulk-delete")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeItems(@PathVariable("id") UUID fridgeId,
+                            @RequestBody @Valid BulkRemoveFridgeItemsRequest request) {
+        var cmd = fridgeItemMapper.toBulkCommand(fridgeId, request);
+        fridgeItemCommandUseCase.bulkRemoveItems(cmd);
     }
 
 

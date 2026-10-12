@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashSet;
@@ -29,7 +31,16 @@ public class OpenFoodFactsApiClient implements OpenFoodFactsApi {
     @Override
     public Optional<ExternalProduct> findByBarcode(Barcode barcode) {
         String url = openFoodFactsUrl + "/product/" + barcode.value();
-        ExternalProductData data = restTemplate.getForObject(url, ExternalProductData.class);
+        ExternalProductData data;
+        try {
+            data = restTemplate.getForObject(url, ExternalProductData.class);
+        } catch (HttpClientErrorException.NotFound ex) {
+            log.info("Product not found in OpenFoodFacts for barcode: {}", barcode.value());
+            return Optional.empty();
+        } catch (RestClientException ex) {
+            log.warn("Error calling OpenFoodFacts API for barcode {}: {}", barcode.value(), ex.getMessage());
+            return Optional.empty();
+        }
 
         if (data == null || data.status() == null || !data.status().startsWith("success")) {
             return Optional.empty();

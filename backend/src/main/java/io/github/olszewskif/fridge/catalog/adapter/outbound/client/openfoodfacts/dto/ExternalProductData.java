@@ -1,13 +1,16 @@
 package io.github.olszewskif.fridge.catalog.adapter.outbound.client.openfoodfacts.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Set;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record ExternalProductData(
         @JsonProperty("product") Product product,
         @JsonProperty("status") String status
 ) {
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record Product(
             @JsonProperty("product_name") String name,
             @JsonProperty("brands") String brand,

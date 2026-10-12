@@ -48,6 +48,13 @@ public class FridgeItemCommandService implements FridgeItemCommandUseCase {
         fridgeRepository.save(fridge);
     }
 
+    @Override
+    public void bulkRemoveItems(BulkRemoveFridgeItemsCommand command) {
+        Fridge fridge = getFridgeById(command.fridgeId());
+        fridge.removeItems(command.itemIds());
+        fridgeRepository.save(fridge);
+    }
+
     private Fridge getFridgeById(FridgeId id) {
         return fridgeRepository.findById(id)
                 .orElseThrow(() -> new FridgeNotFoundException(id));

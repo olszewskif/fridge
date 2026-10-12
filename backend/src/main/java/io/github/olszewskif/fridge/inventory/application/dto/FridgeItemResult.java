@@ -11,6 +11,21 @@ public record FridgeItemResult(
         UserId addedBy,
         Instant addedAt,
         Quantity quantity,
-        @Nullable ExpiryDate expiryDate
+        @Nullable ExpiryDate expiryDate,
+        @Nullable ProductSummaryResult product
 ) {
+    public FridgeItemResult(
+            FridgeItemId id,
+            ProductId productId,
+            UserId addedBy,
+            Instant addedAt,
+            Quantity quantity,
+            @Nullable ExpiryDate expiryDate
+    ) {
+        this(id, productId, addedBy, addedAt, quantity, expiryDate, null);
+    }
+
+    public FridgeItemResult withProduct(@Nullable ProductSummaryResult product) {
+        return new FridgeItemResult(id, productId, addedBy, addedAt, quantity, expiryDate, product);
+    }
 }

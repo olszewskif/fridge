@@ -7,4 +7,5 @@ public interface FridgeItemCommandUseCase {
     FridgeItemResult addItem(AddFridgeItemCommand command);
     FridgeItemResult updateItem(UpdateFridgeItemCommand command);
     void removeItem(RemoveFridgeItemCommand command);
+    void bulkRemoveItems(BulkRemoveFridgeItemsCommand command);
 }

@@ -16,6 +16,7 @@ public interface ProductRepository {
     boolean existsById(ProductId id);
     PageResult<Product> findAll(ProductFilterQuery filters, PageQuery pageQuery);
     Set<Product> findAll(ProductFilterQuery filters);
+    Set<Product> findAllByIds(Set<ProductId> productIds);
     Product save(Product product);
     void delete(ProductId id);
     Optional<Product> findByBarcode(Barcode barcode);

@@ -1,8 +1,9 @@
 package io.github.olszewskif.fridge.catalog.adapter.inbound.internal;
 
-import io.github.olszewskif.fridge.catalog.adapter.inbound.internal.dto.ResolveProductsRequest;
-import io.github.olszewskif.fridge.catalog.adapter.inbound.internal.dto.ResolveProductsResponse;
+import io.github.olszewskif.fridge.catalog.adapter.inbound.internal.dto.*;
 
 public interface ProductInternalApi {
-    ResolveProductsResponse resolveProducts(ResolveProductsRequest request);
+    SearchProductsResponse searchProducts(SearchProductsRequest request);
+    ResolveProductResponse resolveProduct(ResolveProductRequest request);
+    ResolveProductsBatchResponse resolveProductsBatch(ResolveProductsBatchRequest request);
 }

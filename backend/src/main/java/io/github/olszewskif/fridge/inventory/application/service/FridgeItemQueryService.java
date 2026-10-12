@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,8 +29,13 @@ public class FridgeItemQueryService implements FridgeItemQueryUseCase {
 
     @Override
     public FridgeItemResult getItem(GetFridgeItemQuery query) {
-        return fridgeItemQueryRepository.findById(query)
+        FridgeItemResult item = fridgeItemQueryRepository.findById(query)
                 .orElseThrow(() -> new FridgeItemNotFoundException(query.fridgeItemId()));
+
+        ResolveProductResult productResult = productResolver.resolveProduct(
+                new ResolveProductQuery(item.productId()));
+
+        return item.withProduct(productResult != null ? productResult.product() : null);
     }
 
     @Override
@@ -39,10 +45,10 @@ public class FridgeItemQueryService implements FridgeItemQueryUseCase {
 
         if ((filters.search() != null && !filters.search().isBlank()) ||
             (filters.categoryIds() != null && !filters.categoryIds().isEmpty())) {
-            var command = new ResolveProductsCommand(filters.search(), filters.categoryIds());
-            ResolveProductsResult res = productResolver.resolveProducts(command);
+            var command = new SearchProductsQuery(filters.search(), filters.categoryIds());
+            SearchProductsResult res = productResolver.searchProducts(command);
 
-            allProducts = res.products().stream().map(p -> p.productId())
+            allProducts = res.products().stream().map(ProductSummaryResult::productId)
                     .collect(Collectors.toSet());
 
             if (allProducts.isEmpty()) {
@@ -57,7 +63,23 @@ public class FridgeItemQueryService implements FridgeItemQueryUseCase {
                 filters.addedBy(),
                 filters.productId(),
                 allProducts);
-        return fridgeItemQueryRepository.findAll(filterQuery, pageQuery);
+
+        PageResult<FridgeItemResult> pageResult = fridgeItemQueryRepository.findAll(filterQuery, pageQuery);
+        if (pageResult.data().isEmpty()) {
+            return pageResult;
+        }
+
+        Set<ProductId> productIds = pageResult.data().stream()
+                .map(FridgeItemResult::productId)
+                .collect(Collectors.toSet());
+
+        ResolveProductsBatchResult batchResult = productResolver.resolveProductsBatch(
+                new ResolveProductsBatchQuery(productIds)
+        );
+        Map<ProductId, ProductSummaryResult> productMap = batchResult.asMap();
+
+        return pageResult.map(item -> item.withProduct(
+                productMap.get(item.productId())));
     }
 
 }

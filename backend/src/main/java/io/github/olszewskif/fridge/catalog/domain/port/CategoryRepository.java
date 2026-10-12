@@ -5,8 +5,6 @@ import io.github.olszewskif.fridge.catalog.domain.CategoryFilterQuery;
 import io.github.olszewskif.fridge.catalog.domain.CategoryId;
 import io.github.olszewskif.fridge.shared.domain.PageQuery;
 import io.github.olszewskif.fridge.shared.domain.PageResult;
-import org.springframework.data.jpa.repository.Query;
-
 import java.util.Optional;
 import java.util.Set;
 
@@ -18,4 +16,5 @@ public interface CategoryRepository {
     Category save(Category category);
     void delete(CategoryId id);
     Set<Category> findAllByNames(Set<String> names);
+    Set<Category> findByNameOrAliasIn(Set<String> terms);
 }

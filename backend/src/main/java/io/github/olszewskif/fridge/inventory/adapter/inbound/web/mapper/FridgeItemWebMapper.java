@@ -18,7 +18,40 @@ public final class FridgeItemWebMapper {
                 result.addedBy().getValue(),
                 result.addedAt(),
                 result.quantity().value(),
-                result.expiryDate() == null ? null : result.expiryDate().value()
+                result.expiryDate() == null ? null : result.expiryDate().value(),
+                toProductSummaryDto(result.product())
+        );
+    }
+
+    private FridgeItemResponse.ProductSummaryDto toProductSummaryDto(ProductSummaryResult product) {
+        if (product == null) return null;
+
+        FridgeItemResponse.ProductSummaryDto.NetQuantityDto netQuantity = null;
+        if (product.netQuantityDto() != null) {
+            netQuantity = new FridgeItemResponse.ProductSummaryDto.NetQuantityDto(
+                    product.netQuantityDto().value(),
+                    product.netQuantityDto().unit()
+            );
+        }
+
+        java.util.Set<FridgeItemResponse.ProductSummaryDto.CategorySummaryDto> categories = null;
+        if (product.categories() != null) {
+            categories = product.categories().stream()
+                    .map(c -> new FridgeItemResponse.ProductSummaryDto.CategorySummaryDto(
+                            c.id().getValue(),
+                            c.name()
+                    ))
+                    .collect(Collectors.toSet());
+        }
+
+        return new FridgeItemResponse.ProductSummaryDto(
+                product.productId().getValue(),
+                product.name(),
+                product.brand(),
+                product.barcode(),
+                product.imageUrl(),
+                netQuantity,
+                categories
         );
     }
 
@@ -51,5 +84,14 @@ public final class FridgeItemWebMapper {
                 request.addedBy() == null ? null : UserId.of(request.addedBy()),
                 request.search()
         );
+    }
+
+    public BulkRemoveFridgeItemsCommand toBulkCommand(
+            UUID fridgeId,
+            BulkRemoveFridgeItemsRequest request
+    ) {
+        return new BulkRemoveFridgeItemsCommand(FridgeId.of(fridgeId),
+                request.itemIds().stream().map(FridgeItemId::of)
+                        .collect(Collectors.toSet()));
     }
 }

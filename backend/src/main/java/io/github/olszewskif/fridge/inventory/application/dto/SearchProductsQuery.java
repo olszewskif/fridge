@@ -5,7 +5,7 @@ import jakarta.annotation.Nullable;
 
 import java.util.Set;
 
-public record ResolveProductsCommand(
+public record SearchProductsQuery(
         @Nullable String search,
         @Nullable Set<CategoryId> categoryIds
 ) {

@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -78,6 +79,16 @@ public class CategoryJpaRepositoryAdapter implements CategoryRepository {
     public Set<Category> findAllByNames(Set<String> names) {
         return jpaRepository.findByNameInIgnoreCase(names).stream()
                 .map(mapper::toDomainEntity).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<Category> findByNameOrAliasIn(Set<String> terms) {
+        if (terms == null || terms.isEmpty()) {
+            return Collections.emptySet();
+        }
+        return jpaRepository.findByNameOrAliasInIgnoreCase(terms).stream()
+                .map(mapper::toDomainEntity)
+                .collect(Collectors.toSet());
     }
 
 }

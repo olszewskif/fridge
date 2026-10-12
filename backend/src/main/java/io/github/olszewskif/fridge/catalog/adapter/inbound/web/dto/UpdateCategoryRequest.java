@@ -2,10 +2,15 @@ package io.github.olszewskif.fridge.catalog.adapter.inbound.web.dto;
 
 import jakarta.validation.constraints.Size;
 
+import java.util.Set;
 import java.util.UUID;
 
 public record UpdateCategoryRequest(
         @Size(min = 1) String name,
-        UUID parentId
+        UUID parentId,
+        Set<String> aliases
 ) {
+    public UpdateCategoryRequest(String name, UUID parentId) {
+        this(name, parentId, null);
+    }
 }

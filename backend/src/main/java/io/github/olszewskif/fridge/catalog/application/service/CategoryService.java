@@ -41,7 +41,11 @@ public class CategoryService implements CategoryUseCase {
 
     @Override
     public CategoryResult createCategory(CreateCategoryCommand command) {
-        Category category = Category.create(command.name(), resolveParent(command.parentId()));
+        Category category = Category.create(
+                command.name(),
+                resolveParent(command.parentId()),
+                command.aliases()
+        );
         return mapper.toResult(repository.save(category));
     }
 
@@ -51,6 +55,7 @@ public class CategoryService implements CategoryUseCase {
                 .orElseThrow(() -> new CategoryNotFoundException(id));
         if (command.name() != null) category.updateName(command.name());
         if (command.parentId() != null) category.updateParent(resolveParent(command.parentId()));
+        if (command.aliases() != null) category.updateAliases(command.aliases());
         return mapper.toResult(repository.save(category));
     }
 

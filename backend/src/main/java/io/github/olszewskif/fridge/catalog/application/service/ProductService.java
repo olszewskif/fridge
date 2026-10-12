@@ -69,6 +69,27 @@ public class ProductService implements ProductUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Set<ProductResult> getProductsByIds(Set<ProductId> productIds) {
+        if (productIds == null || productIds.isEmpty()) {
+            return Collections.emptySet();
+        }
+        Set<Product> products = productRepository.findAllByIds(productIds);
+        Set<CategoryId> allCategoryIds = products.stream()
+                .flatMap(p -> p.getCategories().stream())
+                .collect(Collectors.toSet());
+        Map<CategoryId, Category> categoryMap = categoryRepository.findAllById(allCategoryIds).stream()
+                .collect(Collectors.toMap(Entity::getId, c -> c));
+
+        return products.stream()
+                .map(p -> mapper.toResult(p, p.getCategories().stream()
+                        .map(categoryMap::get)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet())))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
     public ProductResult createProduct(CreateProductCommand command) {
         Product product = Product.create(
                 command.name(),
@@ -137,8 +158,7 @@ public class ProductService implements ProductUseCase {
         ExternalProduct externalProduct = openFoodFactsApi.findByBarcode(barcode)
                 .orElseThrow(() -> new ProductNotFoundException(barcode));
 
-        Set<String> categoryNames = externalProduct.categories();
-        Set<Category> categories = resolveCategoryNames(categoryNames);
+        Set<Category> categories = resolveCategoriesForExternalProduct(externalProduct);
 
         Product newProduct = Product.create(
                 externalProduct.name(),
@@ -150,6 +170,35 @@ public class ProductService implements ProductUseCase {
         );
         productRepository.save(newProduct);
         return mapper.toResult(newProduct, categories);
+    }
+
+    private Set<Category> resolveCategoriesForExternalProduct(ExternalProduct externalProduct) {
+        Set<String> searchTerms = new HashSet<>();
+
+        if (externalProduct.categories() != null) {
+            for (String tag : externalProduct.categories()) {
+                if (tag != null && !tag.isBlank()) {
+                    searchTerms.add(tag.trim().toLowerCase(Locale.ROOT));
+                }
+            }
+        }
+
+        if (externalProduct.name() != null && !externalProduct.name().isBlank()) {
+            String[] tokens = externalProduct.name().toLowerCase(Locale.ROOT).split("[\\s,.-]+");
+            for (String token : tokens) {
+                if (token.length() >= 3) {
+                    searchTerms.add(token);
+                }
+            }
+        }
+
+        Set<Category> categories = categoryRepository.findByNameOrAliasIn(searchTerms);
+
+        if (categories.isEmpty()) {
+            categories = categoryRepository.findAllByNames(Set.of("Other"));
+        }
+
+        return categories;
     }
 
     private ProductResult toResult(Product product) {
@@ -167,10 +216,6 @@ public class ProductService implements ProductUseCase {
             }
         }
         return categories;
-    }
-
-    private Set<Category> resolveCategoryNames(Set<String> names) {
-        return categoryRepository.findAllByNames(names);
     }
 
     private static <T> void update(T field, Consumer<T> consumer) {
