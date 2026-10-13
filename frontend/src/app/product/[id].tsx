@@ -27,8 +27,9 @@ import {
 import { Theme } from '../../constants/theme';
 import { formatNetQuantity } from '../../utils/format';
 import { useProduct } from '../../features/catalog/hooks/useProduct';
+import { ProductDetailSkeleton } from '../../features/catalog/components/ProductDetailSkeleton';
 import { EditFridgeItemModal } from '../../features/inventory/components/EditFridgeItemModal';
-import { useRemoveFridgeItem } from '../../features/inventory/hooks/useFridgeItems';
+import { useRemoveFridgeItem, useFridgeItem } from '../../features/inventory/hooks/useFridgeItems';
 import { useFridgeStore } from '../../store/useFridgeStore';
 
 export default function ProductDetailScreen() {
@@ -51,14 +52,57 @@ export default function ProductDetailScreen() {
     params.expiryDate || null
   );
 
+  const hasFridgeItem = !!params.fridgeItemId;
+
   const {
-    data: product,
-    isLoading,
-    isError,
-    error,
-    refetch,
-    isRefetching,
-  } = useProduct(productId);
+    data: fridgeItemData,
+    isLoading: isFridgeItemLoading,
+    isError: isFridgeItemError,
+    error: fridgeItemError,
+    refetch: refetchFridgeItem,
+    isRefetching: isFridgeItemRefetching,
+  } = useFridgeItem(activeFridge?.id, params.fridgeItemId);
+
+  // Only query catalog if not opened from a fridge item
+  const {
+    data: catalogProduct,
+    isLoading: isCatalogLoading,
+    isError: isCatalogError,
+    error: catalogError,
+    refetch: refetchCatalog,
+    isRefetching: isCatalogRefetching,
+  } = useProduct(hasFridgeItem ? undefined : productId);
+
+  React.useEffect(() => {
+    if (fridgeItemData) {
+      setCurrentQuantity(fridgeItemData.quantity);
+      setCurrentExpiryDate(fridgeItemData.expiryDate || null);
+    }
+  }, [fridgeItemData]);
+
+  const product = React.useMemo(() => {
+    if (hasFridgeItem && fridgeItemData?.product) {
+      const p = fridgeItemData.product;
+      return {
+        id: p.productId,
+        name: p.name,
+        brand: p.brand,
+        barcode: p.barcode,
+        imageUrl: p.imageUrl,
+        netQuantityDto: p.netQuantity
+          ? { amount: p.netQuantity.value, unit: p.netQuantity.unit }
+          : null,
+        categories: p.categories || [],
+      };
+    }
+    return catalogProduct || null;
+  }, [hasFridgeItem, fridgeItemData, catalogProduct]);
+
+  const isLoading = hasFridgeItem ? isFridgeItemLoading : isCatalogLoading;
+  const isError = hasFridgeItem ? isFridgeItemError : isCatalogError;
+  const error = hasFridgeItem ? fridgeItemError : catalogError;
+  const refetch = hasFridgeItem ? refetchFridgeItem : refetchCatalog;
+  const isRefetching = hasFridgeItem ? isFridgeItemRefetching : isCatalogRefetching;
 
   const removeFridgeItemMutation = useRemoveFridgeItem();
 
@@ -180,10 +224,7 @@ export default function ProductDetailScreen() {
       </View>
 
       {isLoading ? (
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={Theme.colors.primary} />
-          <Text style={styles.loadingText}>Fetching product information...</Text>
-        </View>
+        <ProductDetailSkeleton />
       ) : isError || !product ? (
         <View style={styles.centerContainer}>
           <AlertCircle size={48} color={Theme.colors.expired} />
@@ -237,10 +278,12 @@ export default function ProductDetailScreen() {
             <Text style={styles.productName}>{product.name}</Text>
 
             {/* Barcode Chip */}
-            <View style={styles.barcodeChip}>
-              <Barcode size={16} color={Theme.colors.textSecondary} />
-              <Text style={styles.barcodeText}>{product.barcode}</Text>
-            </View>
+            {product.barcode ? (
+              <View style={styles.barcodeChip}>
+                <Barcode size={16} color={Theme.colors.textSecondary} />
+                <Text style={styles.barcodeText}>{product.barcode}</Text>
+              </View>
+            ) : null}
           </View>
 
           {/* Fridge Item Context (if navigated from fridge) */}

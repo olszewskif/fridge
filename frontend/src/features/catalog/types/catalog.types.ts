@@ -23,6 +23,7 @@ export interface CategoryResponse {
   id: string;
   name: string;
   parentId?: string | null;
+  aliases?: string[];
 }
 
 export interface UpdateProductRequest {

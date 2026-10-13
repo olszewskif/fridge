@@ -30,6 +30,17 @@ export function useFridgeItems(fridgeId?: string | null, params?: FridgeItemsFil
   });
 }
 
+export function useFridgeItem(fridgeId?: string | null, itemId?: string | null) {
+  return useQuery({
+    queryKey: ['fridge-item', fridgeId, itemId],
+    queryFn: () => {
+      if (!fridgeId || !itemId) return null;
+      return inventoryApi.getItemById(fridgeId, itemId);
+    },
+    enabled: !!fridgeId && !!itemId,
+  });
+}
+
 export function useAddFridgeItem() {
   const queryClient = useQueryClient();
 
@@ -71,6 +82,20 @@ export function useRemoveFridgeItem() {
   return useMutation({
     mutationFn: ({ fridgeId, itemId }: { fridgeId: string; itemId: string }) =>
       inventoryApi.removeItem(fridgeId, itemId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [...INVENTORY_QUERY_KEY, variables.fridgeId],
+      });
+    },
+  });
+}
+
+export function useBulkRemoveFridgeItems() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ fridgeId, itemIds }: { fridgeId: string; itemIds: string[] }) =>
+      inventoryApi.bulkRemoveItems(fridgeId, itemIds),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: [...INVENTORY_QUERY_KEY, variables.fridgeId],

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
@@ -18,6 +18,9 @@ export default function ScanScreen() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastScannedBarcode, setLastScannedBarcode] = useState<string | null>(null);
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
+
+  const isProcessingRef = useRef(false);
+  const lastScannedBarcodeRef = useRef<string | null>(null);
 
   if (!permission) {
     return (
@@ -46,8 +49,10 @@ export default function ScanScreen() {
   }
 
   const handleBarcodeScanned = async ({ data }: { data: string }) => {
-    if (isProcessing || confirmVisible || errorInfo || data === lastScannedBarcode) return;
+    if (isProcessingRef.current || confirmVisible || errorInfo || data === lastScannedBarcodeRef.current) return;
 
+    isProcessingRef.current = true;
+    lastScannedBarcodeRef.current = data;
     setIsProcessing(true);
     setLastScannedBarcode(data);
     setErrorInfo(null);
@@ -63,10 +68,13 @@ export default function ScanScreen() {
       setErrorInfo(msg);
     } finally {
       setIsProcessing(false);
+      isProcessingRef.current = false;
     }
   };
 
   const resetScanner = () => {
+    isProcessingRef.current = false;
+    lastScannedBarcodeRef.current = null;
     setErrorInfo(null);
     setLastScannedBarcode(null);
   };
@@ -137,6 +145,8 @@ export default function ScanScreen() {
         onClose={() => {
           setConfirmVisible(false);
           setLastScannedBarcode(null);
+          isProcessingRef.current = false;
+          lastScannedBarcodeRef.current = null;
         }}
         onSuccess={handleAddedSuccess}
       />

@@ -33,7 +33,9 @@ export function FridgeItemGridCard({
   onDragEnd,
 }: Props) {
   const router = useRouter();
-  const { data: product } = useProduct(item.productId);
+  // Only query catalog if product was not already enriched by the backend
+  const hasEmbeddedProduct = !!item.product;
+  const { data: fetchedProduct } = useProduct(hasEmbeddedProduct ? undefined : item.productId);
 
   const handlePress = () => {
     if (onPress) {
@@ -103,8 +105,20 @@ export function FridgeItemGridCard({
   };
 
   const status = getExpiryStatus();
-  const productName = product?.name || item.productName || item.brand || `Product ${item.productId.slice(0, 8)}`;
-  const packageSizeStr = product?.netQuantityDto ? formatNetQuantity(product.netQuantityDto) : null;
+  const productName =
+    item.product?.name ||
+    fetchedProduct?.name ||
+    item.productName ||
+    item.brand ||
+    `Product ${item.productId.slice(0, 8)}`;
+
+  const imageUrl = item.product?.imageUrl || fetchedProduct?.imageUrl;
+
+  const packageSizeStr = item.product?.netQuantity
+    ? `${item.product.netQuantity.value} ${item.product.netQuantity.unit}`
+    : fetchedProduct?.netQuantityDto
+    ? formatNetQuantity(fetchedProduct.netQuantityDto)
+    : null;
 
   return (
     <View
@@ -129,9 +143,9 @@ export function FridgeItemGridCard({
 
       {/* Product Image */}
       <View style={styles.imageContainer}>
-        {product?.imageUrl ? (
+        {imageUrl ? (
           <Image
-            source={{ uri: product.imageUrl }}
+            source={{ uri: imageUrl }}
             style={styles.image}
             contentFit="contain"
             transition={150}

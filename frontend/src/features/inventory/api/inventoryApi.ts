@@ -44,4 +44,8 @@ export const inventoryApi = {
   removeItem: async (fridgeId: string, itemId: string): Promise<void> => {
     await apiClient.delete(`/fridges/${fridgeId}/items/${itemId}`);
   },
+
+  bulkRemoveItems: async (fridgeId: string, itemIds: string[]): Promise<void> => {
+    await apiClient.post(`/fridges/${fridgeId}/items/bulk-delete`, { itemIds });
+  },
 };

@@ -14,10 +14,15 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Package, Camera, CheckSquare, Trash2, X } from 'lucide-react-native';
 import { Theme } from '../../constants/theme';
 import { useFridgeStore } from '../../store/useFridgeStore';
-import { useFridgeItems, useRemoveFridgeItem } from '../../features/inventory/hooks/useFridgeItems';
+import {
+  useFridgeItems,
+  useRemoveFridgeItem,
+  useBulkRemoveFridgeItems,
+} from '../../features/inventory/hooks/useFridgeItems';
 import { FridgeHeader } from '../../features/fridges/components/FridgeHeader';
 import { FridgeItemCard } from '../../features/inventory/components/FridgeItemCard';
 import { FridgeItemGridCard } from '../../features/inventory/components/FridgeItemGridCard';
+import { InventoryLoadingSkeleton } from '../../features/inventory/components/FridgeItemSkeleton';
 import {
   InventoryFilters,
   ExpiryFilterType,
@@ -151,6 +156,7 @@ export default function InventoryScreen() {
   const { data: allItemsPage } = useFridgeItems(activeFridge?.id, { size: 100 });
 
   const removeItemMutation = useRemoveFridgeItem();
+  const bulkRemoveMutation = useBulkRemoveFridgeItems();
 
   const items = itemsPage?.content || [];
 
@@ -257,10 +263,10 @@ export default function InventoryScreen() {
           onPress: async () => {
             setIsDeletingBatch(true);
             try {
-              const deletePromises = Array.from(selectedItemIds).map((itemId) =>
-                removeItemMutation.mutateAsync({ fridgeId: activeFridge.id, itemId })
-              );
-              await Promise.allSettled(deletePromises);
+              await bulkRemoveMutation.mutateAsync({
+                fridgeId: activeFridge.id,
+                itemIds: Array.from(selectedItemIds),
+              });
               handleCancelSelection();
             } catch (err: any) {
               Alert.alert('Error', err?.message || 'Could not complete deletions.');
@@ -329,9 +335,11 @@ export default function InventoryScreen() {
       )}
 
       {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator color={Theme.colors.primary} size="large" />
-        </View>
+        <InventoryLoadingSkeleton
+          viewMode={viewMode}
+          gridCardWidth={gridCardWidth}
+          count={viewMode === 'grid' ? 6 : 8}
+        />
       ) : (
         <FlatList
           ref={flatListRef}

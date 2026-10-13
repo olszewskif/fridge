@@ -21,6 +21,7 @@ import { useFridgeStore } from '../../store/useFridgeStore';
 import { useFridgeItems } from '../../features/inventory/hooks/useFridgeItems';
 import { FridgeHeader } from '../../features/fridges/components/FridgeHeader';
 import { FridgeItemCard } from '../../features/inventory/components/FridgeItemCard';
+import { FridgeItemCardSkeleton } from '../../features/inventory/components/FridgeItemSkeleton';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -216,7 +217,11 @@ export default function HomeScreen() {
         </View>
 
         {isLoading ? (
-          <ActivityIndicator color={Theme.colors.primary} style={{ marginVertical: 36 }} />
+          <View style={styles.recentItemsList}>
+            <FridgeItemCardSkeleton />
+            <FridgeItemCardSkeleton />
+            <FridgeItemCardSkeleton />
+          </View>
         ) : items.length === 0 ? (
           <View style={styles.emptyState}>
             <View style={styles.emptyIconCircle}>

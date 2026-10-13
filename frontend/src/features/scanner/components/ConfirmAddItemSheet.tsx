@@ -12,7 +12,7 @@ import {
   Platform,
   KeyboardAvoidingView,
 } from 'react-native';
-import { X, Plus, Minus, Calendar, Check, Package, Scale } from 'lucide-react-native';
+import { X, Plus, Minus, Calendar, Check, Package, Scale, Tag } from 'lucide-react-native';
 import { Theme } from '../../../constants/theme';
 import { ProductResponse } from '../../catalog/types/catalog.types';
 import { useFridgeStore } from '../../../store/useFridgeStore';
@@ -114,6 +114,16 @@ export function ConfirmAddItemSheet({ visible, product, onClose, onSuccess }: Pr
                     </View>
                   ) : null}
                 </View>
+                {product.categories && product.categories.length > 0 && (
+                  <View style={styles.categoriesRow}>
+                    {product.categories.map((cat) => (
+                      <View key={cat.id} style={styles.categoryBadge}>
+                        <Tag size={10} color={Theme.colors.primaryLight} />
+                        <Text style={styles.categoryBadgeText}>{cat.name}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
                 <Text style={styles.barcodeText}>Barcode: {product.barcode}</Text>
               </View>
             </View>
@@ -316,6 +326,28 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     color: Theme.colors.primaryLight,
+  },
+  categoriesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 4,
+  },
+  categoryBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: Theme.colors.surface,
+    borderWidth: 1,
+    borderColor: Theme.colors.surfaceBorder,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: Theme.radius.md,
+  },
+  categoryBadgeText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: Theme.colors.textSecondary,
   },
   barcodeText: {
     fontSize: 12,
