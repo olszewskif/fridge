@@ -1,8 +1,6 @@
 package io.github.olszewskif.fridge.inventory.application.service;
 
-import io.github.olszewskif.fridge.inventory.application.dto.CreateFridgeCommand;
-import io.github.olszewskif.fridge.inventory.application.dto.FridgeResult;
-import io.github.olszewskif.fridge.inventory.application.dto.UpdateFridgeCommand;
+import io.github.olszewskif.fridge.inventory.application.dto.*;
 import io.github.olszewskif.fridge.inventory.application.mapper.FridgeAppMapper;
 import io.github.olszewskif.fridge.inventory.application.usecase.FridgeUseCase;
 import io.github.olszewskif.fridge.inventory.domain.Fridge;
@@ -30,8 +28,7 @@ public class FridgeService implements FridgeUseCase {
     @Transactional(readOnly = true)
     @Override
     public FridgeResult getFridge(FridgeId id) {
-        Fridge fridge = repository.findById(id)
-                .orElseThrow(() -> new FridgeNotFoundException(id));
+        Fridge fridge = getFridgeById(id);
         return mapper.toResult(fridge);
     }
 
@@ -52,8 +49,7 @@ public class FridgeService implements FridgeUseCase {
 
     @Override
     public FridgeResult updateFridge(FridgeId id, UpdateFridgeCommand command) {
-        Fridge fridge = repository.findById(id)
-                .orElseThrow(() -> new FridgeNotFoundException(id));
+        Fridge fridge = getFridgeById(id);
         if (command.name() != null) fridge.changeName(command.name());
         return mapper.toResult(repository.save(fridge));
     }
@@ -64,5 +60,24 @@ public class FridgeService implements FridgeUseCase {
             throw new FridgeNotFoundException(id);
         }
         repository.delete(id);
+    }
+
+    @Override
+    public void joinFridge(JoinFridgeCommand command) {
+        Fridge fridge = getFridgeById(command.fridgeId());
+        fridge.addUser(command.userId());
+        repository.save(fridge);
+    }
+
+    @Override
+    public void leaveFridge(LeaveFridgeCommand command) {
+        Fridge fridge = getFridgeById(command.fridgeId());
+        fridge.removeUser(command.userId());
+        repository.save(fridge);
+    }
+
+    private Fridge getFridgeById(FridgeId id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new FridgeNotFoundException(id));
     }
 }

@@ -1,30 +1,33 @@
 package io.github.olszewskif.fridge.inventory.domain;
 
 import io.github.olszewskif.fridge.inventory.domain.exception.FridgeItemNotFoundException;
+import io.github.olszewskif.fridge.inventory.domain.exception.UserAlreadyJoinedException;
+import io.github.olszewskif.fridge.inventory.domain.exception.UserLimitReachedException;
+import io.github.olszewskif.fridge.inventory.domain.exception.UserNotFoundException;
 import io.github.olszewskif.fridge.shared.domain.AggregateRoot;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import lombok.Getter;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public final class Fridge extends AggregateRoot<FridgeId> {
+
+    private static final int MAX_USERS = 8;
 
     private String name;
     private final Instant createdAt;
     private final UserId createdBy;
     private final List<FridgeItem> items;
+    private final Set<UserId> userIds;
 
     private Fridge(FridgeId id, String name, UserId createdBy) {
-        this(id, name, Instant.now(), createdBy, new ArrayList<>());
+        this(id, name, Instant.now(), createdBy, new ArrayList<>(), new HashSet<>());
     }
 
     private Fridge(FridgeId id, String name, Instant createdAt, UserId createdBy,
-                   List<FridgeItem> fridgeItems) {
+                   List<FridgeItem> fridgeItems, Set<UserId> userIds) {
         super(id);
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Name cannot be null or blank!");
@@ -33,6 +36,7 @@ public final class Fridge extends AggregateRoot<FridgeId> {
         this.createdAt = Objects.requireNonNull(createdAt, "Creation time cannot be null!");
         this.createdBy = Objects.requireNonNull(createdBy, "User ID cannot be null!");
         this.items = fridgeItems == null ? new ArrayList<>() : new ArrayList<>(fridgeItems);
+        this.userIds = userIds == null ? new HashSet<>() : new HashSet<>(userIds);
     }
 
     public static Fridge create(String name, UserId createdBy) {
@@ -40,8 +44,8 @@ public final class Fridge extends AggregateRoot<FridgeId> {
     }
 
     public static Fridge restore(FridgeId id, String name, Instant createdAt, UserId createdBy,
-                                 List<FridgeItem> fridgeItems) {
-        return new Fridge(id, name, createdAt, createdBy, fridgeItems);
+                                 List<FridgeItem> fridgeItems, Set<UserId> userIds) {
+        return new Fridge(id, name, createdAt, createdBy, fridgeItems, userIds);
     }
 
     @Nonnull public String getName() {
@@ -58,6 +62,10 @@ public final class Fridge extends AggregateRoot<FridgeId> {
 
     @Nonnull public List<FridgeItem> getItems() {
         return List.copyOf(this.items);
+    }
+
+    @Nonnull public Set<UserId> getUserIds() {
+        return Set.copyOf(this.userIds);
     }
 
     public void changeName(String newName) {
@@ -100,6 +108,23 @@ public final class Fridge extends AggregateRoot<FridgeId> {
                 .filter(i -> i.getId().equals(id))
                 .findAny()
                 .orElseThrow(() -> new FridgeItemNotFoundException(id));
+    }
+
+    public void addUser(UserId userId) {
+        if (userIds.contains(userId)) {
+            throw new UserAlreadyJoinedException(this.id, userId);
+        }
+        if (userIds.size() >= MAX_USERS) {
+            throw new UserLimitReachedException(this.id, MAX_USERS);
+        }
+        userIds.add(userId);
+    }
+
+    public void removeUser(UserId userId) {
+        boolean removed = this.userIds.removeIf(i -> i.equals(userId));
+        if (!removed) {
+            throw new UserNotFoundException(this.id, userId);
+        }
     }
 
 }

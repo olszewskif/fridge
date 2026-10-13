@@ -67,6 +67,16 @@ public class FridgeController {
         useCase.deleteFridge(FridgeId.of(id));
     }
 
+    @PostMapping("/{id}/join")
+    public void joinFridge(@PathVariable UUID id) {
+        useCase.joinFridge(new JoinFridgeCommand(FridgeId.of(id), UserId.generate()));
+    }
+
+    @PostMapping("/{id}/leave")
+    public void leave(@PathVariable UUID id) {
+        useCase.leave(new LeaveFridgeCommand(FridgeId.of(id), UserId.generate()));
+    }
+
 
     @GetMapping("/{id}/items/{itemId}")
     public FridgeItemResponse getItem(@PathVariable UUID id, @PathVariable UUID itemId) {
