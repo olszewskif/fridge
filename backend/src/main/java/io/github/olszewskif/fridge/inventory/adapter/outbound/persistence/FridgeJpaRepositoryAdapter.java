@@ -1,6 +1,7 @@
 package io.github.olszewskif.fridge.inventory.adapter.outbound.persistence;
 
 import io.github.olszewskif.fridge.inventory.adapter.outbound.persistence.mapper.FridgeJpaMapper;
+import io.github.olszewskif.fridge.inventory.adapter.outbound.persistence.specification.FridgeSpecifications;
 import io.github.olszewskif.fridge.inventory.domain.Fridge;
 import io.github.olszewskif.fridge.inventory.domain.FridgeFilterQuery;
 import io.github.olszewskif.fridge.inventory.domain.FridgeId;
@@ -24,7 +25,7 @@ public class FridgeJpaRepositoryAdapter implements FridgeRepository {
     private final FridgeJpaMapper mapper;
     private final CommonJpaMapper commonJpaMapper;
 
-    private final io.github.olszewskif.fridge.inventory.adapter.outbound.persistence.specification.FridgeSpecifications specifications;
+    private final FridgeSpecifications specifications;
 
     @Override
     public Optional<Fridge> findById(FridgeId id) {
