@@ -7,6 +7,7 @@ import io.github.olszewskif.fridge.identity.domain.User;
 import io.github.olszewskif.fridge.identity.domain.port.out.UniqueEmailChecker;
 import io.github.olszewskif.fridge.identity.domain.port.out.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,13 +18,14 @@ public class AuthService implements AuthUseCase {
 
     private final UserRepository repository;
     private final UniqueEmailChecker emailChecker;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public RegisterUserResult register(RegisterUserCommand command) {
         User user = User.create(
                 command.displayName(),
                 command.email(),
-                command.password(),
+                passwordEncoder.encode(command.password()),
                 emailChecker
         );
         repository.save(user);
