@@ -4,6 +4,6 @@ import java.util.UUID;
 
 public record RegisterUserResponse(
         UUID userId,
-        String jwt
+        String token
 ) {
 }

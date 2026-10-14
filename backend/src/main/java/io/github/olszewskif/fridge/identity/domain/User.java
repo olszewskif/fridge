@@ -12,18 +12,20 @@ public class User extends AggregateRoot<UserId> {
 
     private String displayName;
     private Email email;
-    private String password;
+    private String hashedPassword;
+    private UserRole role;
 
-    private User(UserId id, String displayName, Email email, String password) {
+    private User(UserId id, String displayName, Email email, String password, UserRole role) {
         super(id);
         this.displayName = DomainUtil.notBlank(displayName, "Display name cannot be null or blank!");
-        this.email = Objects.requireNonNull(email, "Email cannot be null!");
-        this.password = DomainUtil.notBlank(password, "Password cannot be null or blank!");
+        this.email = DomainUtil.notNull(email, "Email cannot be null!");
+        this.hashedPassword = DomainUtil.notBlank(password, "Password cannot be null or blank!");
+        this.role = DomainUtil.notNull(role, "Role cannot be null!");
     }
 
     private User(UserId id, String displayName, Email email, String password,
-                 UniqueEmailChecker emailChecker) {
-        this(id, displayName, email, password);
+                 UserRole role, UniqueEmailChecker emailChecker) {
+        this(id, displayName, email, password, role);
         if (!emailChecker.isUnique(email)) {
             throw new EmailAlreadyExistsException(email);
         }
@@ -31,11 +33,17 @@ public class User extends AggregateRoot<UserId> {
 
     public static User create(String displayName, Email email, String password,
                               UniqueEmailChecker emailChecker) {
-        return new User(UserId.generate(), displayName, email, password, emailChecker);
+        return new User(UserId.generate(), displayName, email, password, UserRole.USER, emailChecker);
     }
 
-    public static User restore(UserId id, String displayName, Email email, String password) {
-        return new User(id, displayName, email, password);
+    public static User createWithRole(String displayName, Email email, String password,
+                                      UserRole role, UniqueEmailChecker emailChecker) {
+        return new User(UserId.generate(), displayName, email, password, role, emailChecker);
+    }
+
+    public static User restore(UserId id, String displayName, Email email, String password,
+                               UserRole role) {
+        return new User(id, displayName, email, password, role);
     }
 
     @Nonnull public String getDisplayName() {
@@ -47,18 +55,26 @@ public class User extends AggregateRoot<UserId> {
     }
 
     @Nonnull public String getPassword() {
-        return password;
+        return hashedPassword;
     }
 
-    public void setDisplayName(String displayName) {
+    @Nonnull public UserRole getRole() {
+        return role;
+    }
+
+    public void changeDisplayName(String displayName) {
         this.displayName = DomainUtil.notBlank(displayName, "Username cannot be null or blank!");
     }
 
-    public void setEmail(Email email) {
-        this.email = Objects.requireNonNull(email, "Email cannot be null!");
+    public void changeEmail(Email email) {
+        this.email = DomainUtil.notNull(email, "Email cannot be null!");
     }
 
-    public void setPassword(String password) {
-        this.password = DomainUtil.notBlank(password, "Password cannot be null or blank!");
+    public void changePassword(String hashedPassword) {
+        this.hashedPassword = DomainUtil.notBlank(hashedPassword, "Password cannot be null or blank!");
+    }
+
+    public void changeRole(UserRole newRole) {
+        this.role = DomainUtil.notNull(newRole, "Role cannot be null!");
     }
 }

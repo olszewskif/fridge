@@ -1,7 +1,9 @@
 package io.github.olszewskif.fridge.identity.application.service;
 
+import io.github.olszewskif.fridge.identity.adapter.in.security.JwtService;
 import io.github.olszewskif.fridge.identity.application.dto.RegisterUserCommand;
 import io.github.olszewskif.fridge.identity.application.dto.RegisterUserResult;
+import io.github.olszewskif.fridge.identity.application.port.outbound.TokenIssuer;
 import io.github.olszewskif.fridge.identity.application.usecase.AuthUseCase;
 import io.github.olszewskif.fridge.identity.domain.User;
 import io.github.olszewskif.fridge.identity.domain.port.out.UniqueEmailChecker;
@@ -19,6 +21,7 @@ public class AuthService implements AuthUseCase {
     private final UserRepository repository;
     private final UniqueEmailChecker emailChecker;
     private final PasswordEncoder passwordEncoder;
+    private final TokenIssuer tokenIssuer;
 
     @Override
     public RegisterUserResult register(RegisterUserCommand command) {
@@ -29,6 +32,7 @@ public class AuthService implements AuthUseCase {
                 emailChecker
         );
         repository.save(user);
-        return new RegisterUserResult(user.getId(), "some-jwt");
+        String token = tokenIssuer.generateToken(user.getId(), user.getEmail(), user.getRole());
+        return new RegisterUserResult(user.getId(), token);
     }
 }

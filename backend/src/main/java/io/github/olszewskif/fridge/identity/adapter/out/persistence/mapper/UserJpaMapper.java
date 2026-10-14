@@ -15,6 +15,7 @@ public class UserJpaMapper {
         entity.setDisplayName(user.getDisplayName());
         entity.setEmail(user.getEmail().value());
         entity.setPassword(user.getPassword());
+        entity.setRole(user.getRole());
         return entity;
     }
 
@@ -23,7 +24,8 @@ public class UserJpaMapper {
                 UserId.of(entity.getId()),
                 entity.getDisplayName(),
                 new Email(entity.getEmail()),
-                entity.getPassword()
+                entity.getPassword(),
+                entity.getRole()
         );
     }
 }

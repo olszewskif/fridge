@@ -21,7 +21,7 @@ public class AuthWebMapper {
     public RegisterUserResponse toResponse(RegisterUserResult result) {
         return new RegisterUserResponse(
                 result.userId().getValue(),
-                result.jwt()
+                result.token()
         );
     }
 }

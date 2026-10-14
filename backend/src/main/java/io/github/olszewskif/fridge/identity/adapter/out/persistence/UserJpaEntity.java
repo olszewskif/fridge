@@ -1,9 +1,8 @@
 package io.github.olszewskif.fridge.identity.adapter.out.persistence;
 
+import io.github.olszewskif.fridge.identity.domain.UserRole;
 import io.github.olszewskif.fridge.shared.adapter.outbound.persistence.JpaEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,4 +24,7 @@ public class UserJpaEntity extends JpaEntity {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
+    private UserRole role;
 }
