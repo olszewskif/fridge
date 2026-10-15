@@ -1,5 +1,7 @@
 package io.github.olszewskif.fridge.identity.adapter.in.web;
 
+import io.github.olszewskif.fridge.identity.adapter.in.web.dto.LoginUserRequest;
+import io.github.olszewskif.fridge.identity.adapter.in.web.dto.LoginUserResponse;
 import io.github.olszewskif.fridge.identity.adapter.in.web.dto.RegisterUserRequest;
 import io.github.olszewskif.fridge.identity.adapter.in.web.dto.RegisterUserResponse;
 import io.github.olszewskif.fridge.identity.adapter.in.web.mapper.AuthWebMapper;
@@ -23,5 +25,11 @@ public class AuthController {
     public RegisterUserResponse registerUser(@RequestBody @Valid RegisterUserRequest request) {
         var command = mapper.toCommand(request);
         return mapper.toResponse(useCase.register(command));
+    }
+
+    @PostMapping("/login")
+    public LoginUserResponse loginUser(@RequestBody @Valid LoginUserRequest request) {
+        var command = mapper.toCommand(request);
+        return mapper.toResponse(useCase.login(command));
     }
 }
