@@ -25,7 +25,7 @@ public class SecurityUserJpaRepositoryAdapter implements LoadSecurityUser {
                 e.getDisplayName(),
                 new Email(e.getEmail()),
                 e.getPassword(),
-                UserRole.USER
+                e.getRole()
         ));
     }
 }
