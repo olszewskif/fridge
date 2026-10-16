@@ -4,6 +4,7 @@ import io.github.olszewskif.fridge.identity.domain.UserId;
 
 public record LoginUserResult(
         UserId userId,
-        String token
+        String accessToken,
+        String refreshToken
 ) {
 }

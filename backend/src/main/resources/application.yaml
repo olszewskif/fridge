@@ -24,3 +24,4 @@ app:
     jwt:
       secret-key: ${JWT_SECRET:28lwgiYehEPDciWmQ98MnPHb3eW1BCdw8jEt3h+stRQ=}
       expiration-ms: 900000
+      refresh-token-expiration-d: 30d

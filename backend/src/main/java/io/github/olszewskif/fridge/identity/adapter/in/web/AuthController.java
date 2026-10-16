@@ -1,17 +1,13 @@
 package io.github.olszewskif.fridge.identity.adapter.in.web;
 
-import io.github.olszewskif.fridge.identity.adapter.in.web.dto.LoginUserRequest;
-import io.github.olszewskif.fridge.identity.adapter.in.web.dto.LoginUserResponse;
-import io.github.olszewskif.fridge.identity.adapter.in.web.dto.RegisterUserRequest;
-import io.github.olszewskif.fridge.identity.adapter.in.web.dto.RegisterUserResponse;
+import io.github.olszewskif.fridge.identity.adapter.in.web.dto.*;
 import io.github.olszewskif.fridge.identity.adapter.in.web.mapper.AuthWebMapper;
+import io.github.olszewskif.fridge.identity.application.dto.LogoutUserCommand;
 import io.github.olszewskif.fridge.identity.application.usecase.AuthUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,5 +27,17 @@ public class AuthController {
     public LoginUserResponse loginUser(@RequestBody @Valid LoginUserRequest request) {
         var command = mapper.toCommand(request);
         return mapper.toResponse(useCase.login(command));
+    }
+
+    @PostMapping("/refresh")
+    public RefreshTokenResponse refreshToken(@RequestBody @Valid RefreshTokenRequest request) {
+        var command = mapper.toCommand(request);
+        return mapper.toResponse(useCase.refresh(command));
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PostMapping("/logout")
+    public void logout(@RequestBody @Valid LogoutUserRequest request) {
+        useCase.logout(new LogoutUserCommand(request.refreshToken()));
     }
 }
